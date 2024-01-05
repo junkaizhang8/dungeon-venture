@@ -46,7 +46,7 @@ int Editor::init(int width, int height, int pixelScale, const char *title)
 
     renderer = std::make_shared<Renderer>();
 
-    renderer->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
+    renderer.get()->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
 
     KeyEvent::setKeyEvent(&keys);
     KeyEvent::setKeyCallback(window);
@@ -74,7 +74,7 @@ void Editor::update()
     // Wall mode
     if (keys.fPressed())
     {
-
+        
     }
     clock.updateClock();
 }
@@ -83,10 +83,10 @@ void Editor::display()
 {   
     if (clock.updateFrame())
     {
-        renderer->clearScreen();
+        renderer.get()->clearScreen();
         grid.drawGrid();
-        renderer->setColour(0, 255, 0);
-        renderer->drawHollowCircle(100, 30, 1);
+        renderer.get()->setColour(0, 255, 0);
+        renderer.get()->drawHollowCircle(100, 30, 1);
         glfwSwapBuffers(window);
     }
     glfwPollEvents();

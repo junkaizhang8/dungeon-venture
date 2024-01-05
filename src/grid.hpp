@@ -13,9 +13,10 @@ class Grid
 {
 public:
     Grid() = default;
-    ~Grid() = default;
-    void init(int xpos, int ypos, int width, int height, std::shared_ptr<Renderer> renderer);
+    ~Grid() {};
+    void init(int xpos, int ypos, int width, int height, std::shared_ptr<Renderer> gridRenderer);
     void drawGrid();
+
 private:
     int x;
     int y;

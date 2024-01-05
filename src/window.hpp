@@ -13,7 +13,7 @@
 class Window
 {
 public:
-    Window() { window = nullptr; }
+    Window() = default;
     virtual ~Window() = default;
     virtual int init(int width, int height, int pixelScale, const char *title) = 0;
     virtual void display() = 0;
@@ -21,7 +21,7 @@ public:
     virtual void close() = 0;
     
 protected:
-    GLFWwindow *window;
+    GLFWwindow *window = nullptr;
     std::shared_ptr<Renderer> renderer;
     Clock clock;
     int windowWidth;

@@ -18,10 +18,10 @@ void Grid::drawGrid()
     int cellWidth = gridWidth / rowAndColumnNum;
     int cellHeight = gridHeight / rowAndColumnNum;
 
-    renderer->setColour(255, 255, 255);
+    renderer.get()->setColour(255, 255, 255);
     for (int i = 0; i <= rowAndColumnNum; i++)
     {
-        renderer->drawRect(cellWidth * i - gridlineWidthHalf + x, y, gridlineWidth, gridHeight);
-        renderer->drawRect(x, cellHeight * i - gridlineWidthHalf + y, gridWidth, gridlineWidth);
+        renderer.get()->drawRect(cellWidth * i - gridlineWidthHalf + x, y, gridlineWidth, gridHeight);
+        renderer.get()->drawRect(x, cellHeight * i - gridlineWidthHalf + y, gridWidth, gridlineWidth);
     }
 }

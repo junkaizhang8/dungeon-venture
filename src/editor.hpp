@@ -25,6 +25,7 @@ public:
     void display() override;
     bool isRunning() override;
     void close() override;
+
 private:
     EditorKeyEvent keys;      // Store key press statuses of certain events
     Cursor cursor;

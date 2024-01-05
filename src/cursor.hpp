@@ -7,6 +7,7 @@ public:
     void setPixelScale(int scale);
     void getCursorPos(GLFWwindow *window, double *x, double *y);
     void getScaledCursorPos(GLFWwindow *window, double *x, double *y);
+
 private:
     int pixelScale;
 };

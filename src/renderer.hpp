@@ -15,6 +15,7 @@ public:
     void drawRect(double x, double y, double width, double height);
     void drawFilledCircle(double x, double y, double r, int numSegments = 100);
     void drawHollowCircle(double x, double y, double r, int numSegments = 100);
+
 private:
     int pixelScale;
     int pixelScaleHalf;
