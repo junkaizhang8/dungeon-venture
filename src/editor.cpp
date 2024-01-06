@@ -51,9 +51,10 @@ int Editor::init(int width, int height, int pixelScale, const char *title)
     KeyEvent::setKeyEvent(&keys);
     KeyEvent::setKeyCallback(window);
 
-    cursor.setPixelScale(pixelScale);
+    Cursor::setMouseButtonCallback(window);
+    Cursor::setPixelScale(pixelScale);
 
-    grid.init(DEFAULT_GRID_X, DEFAULT_GRID_Y, DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT, renderer);
+    grid.init(DEFAULT_GRID_LEFT, DEFAULT_GRID_TOP, DEFAULT_GRID_WIDTH, DEFAULT_GRID_HEIGHT, renderer);
 
     return INIT_SUCCESS;
 }
@@ -68,8 +69,8 @@ void Editor::update()
 {
     double x;
     double y;
-    cursor.getScaledCursorPos(window, &x, &y);
-    std::cout << x << " " << y << std::endl;
+    // Cursor::getScaledCursorPos(&x, &y);
+    // std::cout << x << " " << y << std::endl;
     
     // Wall mode
     if (keys.fPressed())
@@ -86,7 +87,7 @@ void Editor::display()
         renderer.get()->clearScreen();
         grid.drawGrid();
         renderer.get()->setColour(0, 255, 0);
-        renderer.get()->drawHollowCircle(100, 30, 1);
+        renderer.get()->drawHollowCircle(10, 30, 1);
         glfwSwapBuffers(window);
     }
     glfwPollEvents();

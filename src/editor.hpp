@@ -9,8 +9,8 @@
 #include "modemenu.hpp"
 #include "attributesmenu.hpp"
 
-#define DEFAULT_EDITOR_WIDTH DEFAULT_GRID_WIDTH + DEFAULT_ATTRIBUTES_MENU_WIDTH
-#define DEFAULT_EDITOR_HEIGHT DEFAULT_ATTRIBUTES_MENU_HEIGHT
+#define DEFAULT_EDITOR_WIDTH DEFAULT_GRID_WIDTH + DEFAULT_MODE_MENU_WIDTH
+#define DEFAULT_EDITOR_HEIGHT DEFAULT_GRID_HEIGHT
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
@@ -28,6 +28,5 @@ public:
 
 private:
     EditorKeyEvent keys;      // Store key press statuses of certain events
-    Cursor cursor;
     Grid grid;
 };

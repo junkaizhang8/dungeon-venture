@@ -17,13 +17,14 @@ void KeyEvent::checkKeyEvent(GLFWwindow *window, int key, int scancode, int acti
 
     if (!windowShouldClose(window, key, action))
     {
-        keyEvent->keyEvent->handleKeyEvent(window, key, action);
+        keyEvent->handleKeyEvent(window, key, action);
     }
 }
 
 void KeyEvent::setKeyEvent(KeyEvent *newKeyEvent)
 {
-    if (newKeyEvent) {
+    if (newKeyEvent)
+    {
         keyEvent = newKeyEvent;
     }
 }
