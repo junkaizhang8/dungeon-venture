@@ -21,15 +21,8 @@ void KeyEvent::checkKeyEvent(GLFWwindow *window, int key, int scancode, int acti
     }
 }
 
-void KeyEvent::setKeyEvent(KeyEvent *newKeyEvent)
+void KeyEvent::setKeyCallback(GLFWwindow *window)
 {
-    if (newKeyEvent)
-    {
-        keyEvent = newKeyEvent;
-    }
-}
-
-void KeyEvent::setKeyCallback(GLFWwindow *window) {
     glfwSetKeyCallback(window, keyCallback);
 }
 

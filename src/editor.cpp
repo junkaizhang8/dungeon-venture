@@ -67,16 +67,10 @@ void Editor::run()
 
 void Editor::update()
 {
-    double x;
-    double y;
     // Cursor::getScaledCursorPos(&x, &y);
     // std::cout << x << " " << y << std::endl;
     
     // Wall mode
-    if (keys.fPressed())
-    {
-        
-    }
     clock.updateClock();
 }
 
@@ -86,7 +80,16 @@ void Editor::display()
     {
         renderer.get()->clearScreen();
         grid.drawGrid();
+        if (keys.fPressed())
+        {
+            grid.drawNewWall();
+        } else
+        {
+            grid.cancelNewWall();
+        }
         renderer.get()->setColour(0, 255, 0);
+        double test[4][2] = {{20, 30}, {17, 32}, {26, 32}, {26, 28}};
+        renderer.get()->drawQuad(test);
         renderer.get()->drawHollowCircle(10, 30, 1);
         glfwSwapBuffers(window);
     }

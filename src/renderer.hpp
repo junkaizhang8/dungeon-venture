@@ -12,6 +12,7 @@ public:
     void setColour(float red, float green, float blue);
     void clearScreen();
     void drawPixel(double x, double y);
+    void drawQuad(double vertices[4][2]);
     void drawRect(double x, double y, double width, double height);
     void drawFilledCircle(double x, double y, double r, int numSegments = 100);
     void drawHollowCircle(double x, double y, double r, int numSegments = 100);

@@ -16,7 +16,7 @@ class Game : public Window
 {
 public:
     Game() = default;
-    ~Game();
+    ~Game() override;
     int init(int width, int height, int pixelScale, const char *title) override;
     void run();
     void update();

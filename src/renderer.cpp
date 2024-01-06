@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include "renderer.hpp"
 
 void Renderer::init(double left, double right, double bottom, double top, int scale)
@@ -30,6 +30,18 @@ void Renderer::drawPixel(double x, double y)
 {
     glBegin(GL_POINTS);
     glVertex2d(x * pixelScale, y * pixelScale);
+    glEnd();
+}
+
+// Draw a quadrilateral. vertices must contain the coordinates of the 4 vertices
+// ordered in a counterclosewise fashion
+void Renderer::drawQuad(double vertices[4][2])
+{
+    glBegin(GL_QUADS);
+    for (int i = 0; i < 4; i++)
+    {
+        glVertex2d(vertices[i][0] * pixelScale, vertices[i][1] * pixelScale);
+    }
     glEnd();
 }
 
