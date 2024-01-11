@@ -1,3 +1,9 @@
 #include "wall.hpp"
 
-Wall::Wall() : startVertex(nullptr), endVertex(nullptr) {}
+wall_id Wall::largestId = 0;
+
+void Wall::resetVertices()
+{
+    startVertex = nullptr;
+    endVertex = nullptr;
+}

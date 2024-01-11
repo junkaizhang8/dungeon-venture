@@ -7,7 +7,7 @@ class GameKeyEvent : public KeyEvent
 {
 public:
     GameKeyEvent() = default;
-    ~GameKeyEvent() = default;
+    ~GameKeyEvent() override = default;
     void resetKeys() override;
     bool wPressed() { return w; }
     bool sPressed() { return s; }

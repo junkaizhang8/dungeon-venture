@@ -11,8 +11,8 @@ class Player
 {
 public:
     Player() = default;
-    Player(int xpos, int ypos, int zpos, double rotation);
     ~Player() = default;
+    Player(int xpos, int ypos, int zpos, double rotation);
     void setPlayerPosition(int newX, int newY, int newZ, double newR);
     void updatePosition(GameKeyEvent &keys);
     int getX() { return x; }

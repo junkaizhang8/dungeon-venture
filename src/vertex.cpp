@@ -1,8 +1,8 @@
 #include "vertex.hpp"
 
-Vertex::Vertex(int xpos, int ypos) : x(xpos), y(ypos) {}
+vertex_id Vertex::largestId = 0;
 
-void Vertex::getCoords(double coords[2])
+void Vertex::getCoords(int coords[2])
 {
     coords[0] = x;
     coords[1] = y;

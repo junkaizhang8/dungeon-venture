@@ -1,5 +1,6 @@
 #include <cmath>
 #include "renderer.hpp"
+#include <iostream>
 
 void Renderer::init(double left, double right, double bottom, double top, int scale)
 {
@@ -11,23 +12,15 @@ void Renderer::init(double left, double right, double bottom, double top, int sc
     glClearColor(0.2, 0.2, 0.2, 0);
 }
 
-void Renderer::setColour(int red, int green, int blue)
-{
-    glColor3ub(red, green, blue);
-}
-
-void Renderer::setColour(float red, float green, float blue)
-{
-    glColor3f(red, green, blue);
-}
-
 void Renderer::clearScreen()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Renderer::drawPixel(double x, double y)
+void Renderer::drawPixel(double x, double y, rgb_hex rgb)
 {
+    setColour(rgb);
+
     glBegin(GL_POINTS);
     glVertex2d(x * pixelScale, y * pixelScale);
     glEnd();
@@ -35,8 +28,10 @@ void Renderer::drawPixel(double x, double y)
 
 // Draw a quadrilateral. vertices must contain the coordinates of the 4 vertices
 // ordered in a counterclosewise fashion
-void Renderer::drawQuad(double vertices[4][2])
+void Renderer::drawQuad(double vertices[4][2], rgb_hex rgb)
 {
+    setColour(rgb);
+
     glBegin(GL_QUADS);
     for (int i = 0; i < 4; i++)
     {
@@ -45,12 +40,14 @@ void Renderer::drawQuad(double vertices[4][2])
     glEnd();
 }
 
-void Renderer::drawRect(double x, double y, double width, double height)
+void Renderer::drawRect(double x, double y, double width, double height, rgb_hex rgb)
 {
     double scaledX = x * pixelScale;
     double scaledY = y * pixelScale;
     double scaledWidth = width * pixelScale;
     double scaledHeight = height * pixelScale;
+
+    setColour(rgb);
 
     glBegin(GL_QUADS);
     glVertex2d(scaledX, scaledY); // Top-left vertex
@@ -60,18 +57,15 @@ void Renderer::drawRect(double x, double y, double width, double height)
     glEnd();
 }
 
-void Renderer::drawFilledCircle(double x, double y, double r, int numSegments)
+void Renderer::drawFilledCircle(double x, double y, double r, rgb_hex rgb)
 {
-    if (!numSegments)
-    {
-        return;
-    }
+    setColour(rgb);
 
     glBegin(GL_TRIANGLE_FAN);
     glVertex2d(x * pixelScale, y * pixelScale);
-    for (int i = 0; i <= numSegments; i++)
+    for (int i = 0; i <= CIRCLE_SEGMENT_NUM; i++)
     {
-        double theta = 2.0 * M_PI * (double)i / (double)numSegments;
+        double theta = 2.0 * M_PI * (double)i / (double)CIRCLE_SEGMENT_NUM;
         double vx = r * cos(theta); // x-coordinate of current vertex
         double vy = r * sin(theta); // y-coordinate of current vertex
         glVertex2d((x + vx) * pixelScale, (y + vy) * pixelScale); // Draw vertex
@@ -79,22 +73,26 @@ void Renderer::drawFilledCircle(double x, double y, double r, int numSegments)
     glEnd();
 }
 
-void Renderer::drawHollowCircle(double x, double y, double r, int numSegments)
+void Renderer::drawHollowCircle(double x, double y, double r, rgb_hex rgb)
 {
-    if (!numSegments)
-    {
-        return;
-    }
+    setColour(rgb);
 
     glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < numSegments; i++)
+    for (int i = 0; i < CIRCLE_SEGMENT_NUM; i++)
     {
-        double theta = 2.0 * M_PI * (double)i / (double)numSegments;
+        double theta = 2.0 * M_PI * (double)i / (double)CIRCLE_SEGMENT_NUM;
         double vx = r * cos(theta); // x-coordinate of current vertex
         double vy = r * sin(theta); // y-coordinate of current vertex
 
         glVertex2d((x + vx) * pixelScale, (y + vy) * pixelScale); // Draw vertex
     }
     glEnd();
+}
 
+void Renderer::setColour(rgb_hex rgb)
+{
+    int red = (rgb >> 16) & 0xFF;
+    int green = (rgb >> 8) & 0xFF;
+    int blue = rgb & 0xFF;
+    glColor3ub(red, green, blue);
 }
