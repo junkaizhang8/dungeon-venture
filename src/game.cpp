@@ -65,11 +65,9 @@ void Game::display()
 {   
     if (clock.updateFrame())
     {
-        renderer.get()->setColour(255, 0, 0);
         player.updatePosition(keys);
         renderer.get()->clearScreen();
         renderer.get()->drawPixel(player.getX(), player.getY());
-        renderer.get()->setColour(0, 255, 0);
         renderer.get()->drawHollowCircle(100, 30, 1);
         glfwSwapBuffers(window);
     }

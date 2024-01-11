@@ -6,7 +6,7 @@ class EditorKeyEvent : public KeyEvent
 {
 public:
     EditorKeyEvent() = default;
-    ~EditorKeyEvent() = default;
+    ~EditorKeyEvent() override = default;
     void resetKeys() override;
     bool qPressed() { return q; }
     bool fPressed() { return f; }

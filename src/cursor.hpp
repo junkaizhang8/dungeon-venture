@@ -11,16 +11,19 @@ public:
     static void checkMouseButtonEvent(GLFWwindow *w, int button, int action, int mods);
     static void setMouseButtonCallback(GLFWwindow *w);
     static void setPixelScale(int scale) { pixelScale = scale; }
-    
-    // Get cursor position in standard coordinates
     static void getCursorPos(double *x, double *y) { glfwGetCursorPos(window, x, y); }
-    static void getScaledCursorPos(int *x, int *y);
+    static void getScaledCursorPos(int &x, int &y);
     static bool leftButtonPressed() { return left; }
     static bool rightButtonPressed() { return right; }
+    static bool mouseButtonDown() { return buttonDown; }
+    static void getScaledOnLeftClickPos(int &x, int &y);
 
 private:
     static GLFWwindow *window;
     static int pixelScale;
     static bool left;
     static bool right;
+    static bool buttonDown;
+    static int scaledOnLeftClickX;
+    static int scaledOnLeftClickY;
 };
