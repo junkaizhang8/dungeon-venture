@@ -4,7 +4,7 @@ INCLUDE_PATHS = -I include
 FRAMEWORKS = -framework Cocoa -framework OpenGL -framework IOKit
 LIBRARY_PATHS = -L lib/GLFW
 LINKER_FLAGS = -l glfw3
-COMPILER_FLAGS = -std=c++11 -Wall -O0 -g -Wno-deprecated-declarations
+COMPILER_FLAGS = -std=c++14 -Wall -O0 -g -Wno-deprecated-declarations
 SRC_DIR = src
 BUILD_DIR = build
 CPP_FILES = $(wildcard $(SRC_DIR)/*.cpp)

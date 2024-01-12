@@ -12,19 +12,19 @@ void Player::setPlayerPosition(int newX, int newY, int newZ, double newR)
 
 void Player::updatePosition(GameKeyEvent &keys)
 {
-    if (keys.wPressed())
+    if (keys.wDown())
     {
         y--;
     }
-    if (keys.sPressed())
+    if (keys.sDown())
     {
         y++;
     }
-    if (keys.aPressed())
+    if (keys.aDown())
     {
         x--;
     }
-    if (keys.dPressed())
+    if (keys.dDown())
     {
         x++;
     }
