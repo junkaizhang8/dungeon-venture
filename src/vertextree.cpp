@@ -1,6 +1,8 @@
+#include <iostream>
 #include <memory>
 #include "vertex.hpp"
 #include "vertextree.hpp"
+#include "renderer.hpp"
 
 void VertexTree::insert(const std::shared_ptr<Vertex> &newVertex)
 {
@@ -22,12 +24,18 @@ std::shared_ptr<Vertex> VertexTree::proximitySearch(const int coords[2], double 
     return proximitySearch(root, coords, dist * dist, 0);
 }
 
+void VertexTree::drawVertices(std::shared_ptr<Renderer> &renderer, int gridLeft, int gridRight,\
+                              int gridTop, int gridBottom)
+{
+    drawVertices(root, renderer, gridLeft, gridRight, gridTop, gridBottom);
+}
 
-void VertexTree::insert(std::shared_ptr<VertexNode> &node, const std::shared_ptr<Vertex> &newVertex, unsigned depth)
+void VertexTree::insert(std::unique_ptr<VertexNode> &node, const std::shared_ptr<Vertex> &newVertex, unsigned depth)
 {
     if (node == nullptr)
     {
-        node = std::make_shared<VertexNode>(newVertex);
+        std::unique_ptr<VertexNode> temp = std::make_unique<VertexNode>(newVertex);
+        node = std::move(temp);
         return;
     }
 
@@ -55,7 +63,7 @@ void VertexTree::insert(std::shared_ptr<VertexNode> &node, const std::shared_ptr
     }
 }
 
-std::shared_ptr<Vertex> VertexTree::search(const std::shared_ptr<VertexNode> &node, const int coords[2], unsigned depth)
+std::shared_ptr<Vertex> VertexTree::search(const std::unique_ptr<VertexNode> &node, const int coords[2], unsigned depth)
 {
     if (node == nullptr)
     {
@@ -90,7 +98,7 @@ std::shared_ptr<Vertex> VertexTree::search(const std::shared_ptr<VertexNode> &no
     }
 }
 
-std::shared_ptr<Vertex> VertexTree::proximitySearch(const std::shared_ptr<VertexNode> &node, const int coords[2],\
+std::shared_ptr<Vertex> VertexTree::proximitySearch(const std::unique_ptr<VertexNode> &node, const int coords[2],\
                                                     double distSquared, unsigned depth)
 {
     if (node == nullptr)
@@ -129,4 +137,17 @@ std::shared_ptr<Vertex> VertexTree::proximitySearch(const std::shared_ptr<Vertex
             return proximitySearch(node.get()->right, coords, distSquared, depth + 1);
         }
     }
+}
+
+void VertexTree::drawVertices(std::unique_ptr<VertexNode> &node, std::shared_ptr<Renderer> &renderer,\
+                              int gridLeft, int gridRight, int gridTop, int gridBottom)
+{
+    if (node == nullptr)
+    {
+        return;
+    }
+
+    drawVertices(node.get()->left, renderer, gridLeft, gridRight, gridTop, gridBottom);
+    node.get()->vertex.get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawVertices(node.get()->right, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }

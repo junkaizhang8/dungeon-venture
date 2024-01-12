@@ -33,45 +33,55 @@ void Grid::drawGrid()
 void Grid::drawGridItems()
 {
     drawWalls();
+    drawVertices();
 }
 
-void Grid::drawNewWall()
+void Grid::selectMode()
 {
     int cursorX;
     int cursorY;
-    int onClickCursorX;
-    int onClickCursorY;
 
-    Cursor::getScaledOnLeftClickPos(onClickCursorX, onClickCursorY);
-
-    if (!inGrid(onClickCursorX, onClickCursorY))
+    if (!onClickInGrid())
     {
         return;
     }
 
     Cursor::getScaledCursorPos(cursorX, cursorY);
 
-    if (Cursor::leftButtonPressed())
+    if (Cursor::leftButtonDown())
     {
-        if (cursorX < gridLeft)
-        {
-            cursorX = gridLeft;
-        }
+        // Force the cursor position to be within the grid so that dragging the
+        // vertices won't go beyond the grid boundaries
+        forceCoordsInGrid(cursorX, cursorY);
 
-        if (cursorX > gridRight)
-        {
-            cursorX = gridRight;
-        }
+        windowCoordToGridCoord(cursorX, cursorY);
+    }
 
-        if (cursorY < gridTop)
-        {
-            cursorY = gridTop;
-        }
+    int coords[2] = {cursorX, cursorY};
+    std::shared_ptr<Vertex> selectedVertex = vertexTree.proximitySearch(coords, GRID_VERTEX_RADIUS);
 
-        if (cursorY > gridBottom)
-        {
-            cursorY = gridBottom;
-        }
+    
+}
+
+void cancelSelectMode() {}
+
+void Grid::wallMode()
+{
+    int cursorX;
+    int cursorY;
+
+    if (!onClickInGrid())
+    {
+        return;
+    }
+
+    Cursor::getScaledCursorPos(cursorX, cursorY);
+
+    if (Cursor::leftButtonDown())
+    {
+        // Force the cursor position to be within the grid so that the wall
+        // won't go beyond the grid boundaries
+        forceCoordsInGrid(cursorX, cursorY);
 
         windowCoordToGridCoord(cursorX, cursorY);
 
@@ -80,7 +90,7 @@ void Grid::drawNewWall()
 
         if (newWall.getStartVertex() == nullptr)
         {
-            if ((neighbourVertex = tree.proximitySearch(coords, VERTEX_SNAP_DIST)))
+            if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
             {
                 newWall.setStartVertex(neighbourVertex);
             } else
@@ -98,7 +108,9 @@ void Grid::drawNewWall()
             newWall.getEndVertex()->setY(cursorY);
         }
 
-        drawWall(newWall);
+        newWall.getStartVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+        newWall.drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+        newWall.getEndVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
     } else
     {
         if (!newWall.getStartVertex() || !newWall.getEndVertex())
@@ -111,7 +123,7 @@ void Grid::drawNewWall()
 
         newWall.getEndVertex().get()->getCoords(coords);
 
-        if ((neighbourVertex = tree.proximitySearch(coords, VERTEX_SNAP_DIST)))
+        if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
         {
             newWall.setEndVertex(neighbourVertex);
         }
@@ -124,8 +136,8 @@ void Grid::drawNewWall()
 
         if (!sameCoords(startCoords, endCoords))
         {
-            tree.insert(newWall.getStartVertex());
-            tree.insert(newWall.getEndVertex());
+            vertexTree.insert(newWall.getStartVertex());
+            vertexTree.insert(newWall.getEndVertex());
             wallList.push_back(newWall);
             graph.insertMapping(newWall);
         }
@@ -135,7 +147,7 @@ void Grid::drawNewWall()
     }
 }
 
-void Grid::cancelNewWall()
+void Grid::cancelWallMode()
 {
     newWall.resetVertices();
 }
@@ -149,49 +161,6 @@ bool Grid::newWallDrawn()
     }
 
     return false;
-}
-
-void Grid::drawWalls()
-{
-    for (Wall wall : wallList)
-    {
-        drawWall(wall);
-    }
-}
-
-void Grid::drawWall(Wall &wall)
-{
-    int startCoords[2] = {};
-    int endCoords[2] = {};
-
-    wall.getStartVertex().get()->getCoords(startCoords);
-    wall.getEndVertex().get()->getCoords(endCoords);
-    gridCoordToWindowCoord(startCoords[0], startCoords[1]);
-    gridCoordToWindowCoord(endCoords[0], endCoords[1]);
-
-    double wallWidth = GRID_WALL_WIDTH;
-    double wallWidthHalf = wallWidth / 2;
-    double theta = atan((double)(startCoords[1] - endCoords[1]) / (double)(startCoords[0] - endCoords[0]));
-    double xOffset = wallWidthHalf * sin(theta);
-    double yOffset = wallWidthHalf * cos(theta);
-
-    double vertices[4][2] =
-    {
-        {startCoords[0] - xOffset, startCoords[1] + yOffset},
-        {startCoords[0] + xOffset, startCoords[1] - yOffset},
-        {endCoords[0] + xOffset, endCoords[1] - yOffset},
-        {endCoords[0] - xOffset, endCoords[1] + yOffset}
-    };
-
-    renderer.get()->drawQuad(vertices, YELLOW);
-
-    renderer.get()->drawFilledCircle(startCoords[0], startCoords[1], GRID_VERTEX_RADIUS, WHITE);
-    renderer.get()->drawFilledCircle(endCoords[0], endCoords[1], GRID_VERTEX_RADIUS, WHITE);
-}
-
-bool Grid::inGrid(int x, int y)
-{
-    return (x >= gridLeft) && (x <= gridRight) && (y >= gridTop) && (y <= gridBottom);
 }
 
 /*
@@ -211,6 +180,59 @@ void Grid::gridCoordToWindowCoord(int &x, int &y)
 {
     x += gridRight / 2;
     y += gridBottom / 2;
+}
+
+void Grid::drawWalls()
+{
+    for (Wall wall : wallList)
+    {
+        wall.drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    }
+}
+
+void Grid::drawVertices()
+{
+    vertexTree.drawVertices(renderer, gridLeft, gridRight, gridTop, gridBottom);
+}
+
+// Return if (x, y) is in the grid.
+bool Grid::inGrid(int x, int y)
+{
+    return (x >= gridLeft) && (x <= gridRight) && (y >= gridTop) && (y <= gridBottom);
+}
+
+// Return if the clicking position of cursor is in the grid.
+bool Grid::onClickInGrid()
+{
+    int x;
+    int y;
+    Cursor::getScaledOnLeftClickPos(x, y);
+
+    return inGrid(x, y);
+}
+
+// Force x and y to be within the grid boundaries if they exceed the boundaries.
+void Grid::forceCoordsInGrid(int &x, int &y)
+{
+    if (x < gridLeft)
+    {
+        x = gridLeft;
+    }
+
+    if (x > gridRight)
+    {
+        x = gridRight;
+    }
+
+    if (y < gridTop)
+    {
+        y = gridTop;
+    }
+
+    if (y > gridBottom)
+    {
+        y = gridBottom;
+    }
 }
 
 bool Grid::sameCoords(const int coords1[2], const int coords2[2])

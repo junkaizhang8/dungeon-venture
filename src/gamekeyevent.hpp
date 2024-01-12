@@ -9,10 +9,10 @@ public:
     GameKeyEvent() = default;
     ~GameKeyEvent() override = default;
     void resetKeys() override;
-    bool wPressed() { return w; }
-    bool sPressed() { return s; }
-    bool aPressed() { return a; }
-    bool dPressed() { return d; }
+    bool wDown() { return w; }
+    bool sDown() { return s; }
+    bool aDown() { return a; }
+    bool dDown() { return d; }
 
 private:
     bool w = false;

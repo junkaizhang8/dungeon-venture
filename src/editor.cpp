@@ -77,18 +77,27 @@ void Editor::display()
         renderer.get()->clearScreen();
         grid.drawGrid();
 
+        // if (keys.qPressed())
+        // {
+        //     grid.selectMode();
+        // } else
+        // {
+        //     grid.cancelSelectMode();
+        // }
+
         if (keys.fPressed())
         {
-            grid.drawNewWall();
+            grid.wallMode();
         } else
         {
-            grid.cancelNewWall();
+            grid.cancelWallMode();
         }
 
         grid.drawGridItems();
 
         glfwSwapBuffers(window);
     }
+    
     glfwPollEvents();
 }
 

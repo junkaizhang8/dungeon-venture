@@ -22,7 +22,8 @@ void EditorKeyEvent::handleKeyEvent(GLFWwindow *window, int key, int action)
             if (q)
             {
                 resetKeys();
-            } else
+            }
+            else
             {
                 resetKeys();
                 q = true;
@@ -32,7 +33,8 @@ void EditorKeyEvent::handleKeyEvent(GLFWwindow *window, int key, int action)
             if (f)
             {
                 resetKeys();
-            } else
+            }
+            else
             {
                 resetKeys();
                 f = true;
