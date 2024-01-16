@@ -37,7 +37,7 @@ int Game::init(int width, int height, int pixelScale, const char *title)
         close();
         return INIT_ERROR;
     }
-    
+
     glfwMakeContextCurrent(window);
 
     glfwSetWindowUserPointer(window, this);
@@ -62,7 +62,7 @@ void Game::run()
 void Game::update() {}
 
 void Game::display()
-{   
+{
     if (clock.updateFrame())
     {
         player.updatePosition(keys);

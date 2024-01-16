@@ -14,5 +14,6 @@ public:
 private:
     bool q = false;
     bool f = false;
+
     void handleKeyEvent(GLFWwindow *window, int key, int action) override;
 };

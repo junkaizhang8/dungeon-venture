@@ -15,5 +15,6 @@ public:
 
 protected:
     static KeyEvent *keyEvent;
+
     virtual void handleKeyEvent(GLFWwindow *window, int key, int action) = 0;
 };

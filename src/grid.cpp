@@ -2,20 +2,28 @@
 #include <cmath>
 #include "renderer.hpp"
 #include "cursor.hpp"
+#include "vertex.hpp"
 #include "wall.hpp"
 #include "vertextree.hpp"
+#include "vertexgraph.hpp"
+#include "walltree.hpp"
 #include "grid.hpp"
 
-void Grid::init(int left, int right, int top, int bottom, std::shared_ptr<Renderer> gridRenderer)
+/*
+ * Initialize the grid specified by its boundary positions in the window and
+ * the renderer assigned to the window
+ */
+void Grid::init(int left, int right, int top, int bottom, Renderer *gridRenderer)
 {
     gridLeft = left;
     gridRight = right;
     gridTop = top;
     gridBottom = bottom;
     renderer = gridRenderer;
+    newWall = std::make_shared<Wall>();
 }
 
-void Grid::drawGrid()
+void Grid::drawGrid() const
 {
     int rowAndColumnNum = 10;
     double gridlineWidth = 0.2;
@@ -25,8 +33,8 @@ void Grid::drawGrid()
 
     for (int i = 0; i <= rowAndColumnNum; i++)
     {
-        renderer.get()->drawRect(cellWidth * i - gridlineWidthHalf + gridLeft, gridTop, gridlineWidth, gridBottom, WHITE);
-        renderer.get()->drawRect(gridLeft, cellHeight * i - gridlineWidthHalf + gridTop, gridRight, gridlineWidth, WHITE);
+        renderer->drawRect(cellWidth * i - gridlineWidthHalf + gridLeft, gridTop, gridlineWidth, gridBottom, WHITE);
+        renderer->drawRect(gridLeft, cellHeight * i - gridlineWidthHalf + gridTop, gridRight, gridlineWidth, WHITE);
     }
 }
 
@@ -34,43 +42,122 @@ void Grid::drawGridItems()
 {
     drawWalls();
     drawVertices();
+
+    if (selectedObj)
+    {
+        selectedObj->drawObjSelected(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    }
 }
 
 void Grid::selectMode()
 {
-    int cursorX;
-    int cursorY;
+    int onLeftClickCursorX;
+    int onLeftClickCursorY;
+    int onRightClickCursorX;
+    int onRightClickCursorY;
 
-    if (!onClickInGrid())
+    // Check for if right mouse button is in down position and in the grid
+    // If true, unselect the selected object
+    if (Cursor::rightButtonDown())
+    {
+        Cursor::getScaledOnRightClickPos(onRightClickCursorX, onRightClickCursorY);
+
+        if (inGrid(onRightClickCursorX, onRightClickCursorY))
+        {
+            selectedObj = nullptr;
+            return;
+        }
+    }
+
+    Cursor::getScaledOnLeftClickPos(onLeftClickCursorX, onLeftClickCursorY);
+
+    if (!inGrid(onLeftClickCursorX, onLeftClickCursorY))
     {
         return;
     }
 
-    Cursor::getScaledCursorPos(cursorX, cursorY);
-
+    // Check for if left mouse button is in down position and in the grid
     if (Cursor::leftButtonDown())
     {
-        // Force the cursor position to be within the grid so that dragging the
-        // vertices won't go beyond the grid boundaries
-        forceCoordsInGrid(cursorX, cursorY);
+        if (wallModeLeftButtonClicked)
+        {
+            return;
+        }
 
-        windowCoordToGridCoord(cursorX, cursorY);
+        updateSelectedObj();
+
+        selectModeLeftButtonClicked = true;
     }
+    else
+    {
+        wallModeLeftButtonClicked = false;
 
-    int coords[2] = {cursorX, cursorY};
-    std::shared_ptr<Vertex> selectedVertex = vertexTree.proximitySearch(coords, GRID_VERTEX_RADIUS);
+        if (!selectModeLeftButtonClicked)
+        {
+            return;
+        }
 
-    
+        selectModeLeftButtonClicked = false;
+
+        std::shared_ptr<Vertex> selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj);
+        if (selectedObjVertexCasted)
+        {
+            // If vertex was snapped to neighbour vertex
+            if (snapToNeighbourVertex(selectedObjVertexCasted))
+            {
+                updateSelectedObjOnSnap(selectedObjVertexCasted);
+            }
+            else
+            {
+                vertexTree.insert(selectedObjVertexCasted);
+            }
+
+            selectedVertexRemoved = false;
+        }
+    }
 }
 
-void cancelSelectMode() {}
+void Grid::cancelSelectMode()
+{
+    if (selectModeLeftButtonClicked)
+    {
+        selectModeLeftButtonClicked = false;
+
+        if (selectedObj == nullptr)
+        {
+            return;
+        }
+
+        std::shared_ptr<Vertex> selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj);
+
+        if (selectedObjVertexCasted)
+        {
+            if (snapToNeighbourVertex(selectedObjVertexCasted))
+            {
+                updateSelectedObjOnSnap(selectedObjVertexCasted);
+            }
+            else
+            {
+                vertexTree.insert(selectedObjVertexCasted);
+            }
+
+            selectedVertexRemoved = false;
+        }
+    }
+
+    selectedObj = nullptr;
+}
 
 void Grid::wallMode()
 {
     int cursorX;
     int cursorY;
+    int onLeftClickCursorX;
+    int onLeftClickCursorY;
 
-    if (!onClickInGrid())
+    Cursor::getScaledOnLeftClickPos(onLeftClickCursorX, onLeftClickCursorY);
+
+    if (!inGrid(onLeftClickCursorX, onLeftClickCursorY))
     {
         return;
     }
@@ -79,6 +166,13 @@ void Grid::wallMode()
 
     if (Cursor::leftButtonDown())
     {
+        if (selectModeLeftButtonClicked)
+        {
+            return;
+        }
+
+        wallModeLeftButtonClicked = true;
+
         // Force the cursor position to be within the grid so that the wall
         // won't go beyond the grid boundaries
         forceCoordsInGrid(cursorX, cursorY);
@@ -88,32 +182,44 @@ void Grid::wallMode()
         std::shared_ptr<Vertex> neighbourVertex;
         int coords[2] = {cursorX, cursorY};
 
-        if (newWall.getStartVertex() == nullptr)
+        if (newWall.get()->getStartVertex() == nullptr)
         {
             if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
             {
-                newWall.setStartVertex(neighbourVertex);
-            } else
+                newWall.get()->setStartVertex(neighbourVertex);
+            }
+            else
             {
-                newWall.setStartVertex(std::make_shared<Vertex>(cursorX, cursorY));
+                newWall.get()->setStartVertex(std::make_shared<Vertex>(cursorX, cursorY));
             }
         }
-        
-        if (newWall.getEndVertex() == nullptr)
+
+        if (newWall.get()->getEndVertex() == nullptr)
         {
-            newWall.setEndVertex(std::make_shared<Vertex>(cursorX, cursorY));
-        } else
+            newWall.get()->setEndVertex(std::make_shared<Vertex>(cursorX, cursorY));
+        }
+        else
         {
-            newWall.getEndVertex()->setX(cursorX);
-            newWall.getEndVertex()->setY(cursorY);
+            newWall.get()->getEndVertex()->setX(cursorX);
+            newWall.get()->getEndVertex()->setY(cursorY);
         }
 
-        newWall.getStartVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-        newWall.drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-        newWall.getEndVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-    } else
+        newWall.get()->getStartVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+        newWall.get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+        newWall.get()->getEndVertex().get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    }
+    else
     {
-        if (!newWall.getStartVertex() || !newWall.getEndVertex())
+        selectModeLeftButtonClicked = false;
+
+        if (!wallModeLeftButtonClicked)
+        {
+            return;
+        }
+
+        wallModeLeftButtonClicked = false;
+
+        if (!newWall.get()->getStartVertex() || !newWall.get()->getEndVertex())
         {
             return;
         }
@@ -121,46 +227,41 @@ void Grid::wallMode()
         std::shared_ptr<Vertex> neighbourVertex;
         int coords[2];
 
-        newWall.getEndVertex().get()->getCoords(coords);
+        newWall.get()->getEndVertex().get()->getCoords(coords);
 
         if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
         {
-            newWall.setEndVertex(neighbourVertex);
+            newWall.get()->setEndVertex(neighbourVertex);
         }
 
         int startCoords[2];
         int endCoords[2];
 
-        newWall.getStartVertex().get()->getCoords(startCoords);
-        newWall.getEndVertex().get()->getCoords(endCoords);
+        newWall.get()->getStartVertex().get()->getCoords(startCoords);
+        newWall.get()->getEndVertex().get()->getCoords(endCoords);
 
-        if (!sameCoords(startCoords, endCoords))
+        // If startCoords and endCoords are not equal and there does not already exist
+        // a wall between the start vertex and end vertex, save the newWall data.
+        // Else, reset newWall.
+        if (!sameCoords(startCoords, endCoords) && !graph.contains(newWall->getStartVertex()->getId(),
+                                                                   newWall->getEndVertex()->getId()))
         {
-            vertexTree.insert(newWall.getStartVertex());
-            vertexTree.insert(newWall.getEndVertex());
-            wallList.push_back(newWall);
-            graph.insertMapping(newWall);
+            vertexTree.insert(newWall.get()->getStartVertex());
+            vertexTree.insert(newWall.get()->getEndVertex());
+            wallTree.insert(newWall);
+            graph.insertMapping(*newWall);
         }
 
-        Wall wall;
-        newWall = wall;
+        newWall.reset(new Wall());
     }
 }
 
 void Grid::cancelWallMode()
 {
-    newWall.resetVertices();
-}
-
-bool Grid::newWallDrawn()
-{
-    if (newWallDrawnFlag)
+    if (newWall)
     {
-        newWallDrawnFlag = false;
-        return true;
+        newWall.get()->resetVertices();
     }
-
-    return false;
 }
 
 /*
@@ -168,7 +269,7 @@ bool Grid::newWallDrawn()
  * In grid coordinates, instead of having (0, 0) be on the top left of grid,
  * it would be at the center of the grid, analogous to the origin
  * of the Cartesian plane.
-*/
+ */
 void Grid::windowCoordToGridCoord(int &x, int &y)
 {
     x -= gridRight / 2;
@@ -184,10 +285,7 @@ void Grid::gridCoordToWindowCoord(int &x, int &y)
 
 void Grid::drawWalls()
 {
-    for (Wall wall : wallList)
-    {
-        wall.drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-    }
+    wallTree.drawWalls(renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
 
 void Grid::drawVertices()
@@ -196,23 +294,13 @@ void Grid::drawVertices()
 }
 
 // Return if (x, y) is in the grid.
-bool Grid::inGrid(int x, int y)
+bool Grid::inGrid(int x, int y) const
 {
     return (x >= gridLeft) && (x <= gridRight) && (y >= gridTop) && (y <= gridBottom);
 }
 
-// Return if the clicking position of cursor is in the grid.
-bool Grid::onClickInGrid()
-{
-    int x;
-    int y;
-    Cursor::getScaledOnLeftClickPos(x, y);
-
-    return inGrid(x, y);
-}
-
 // Force x and y to be within the grid boundaries if they exceed the boundaries.
-void Grid::forceCoordsInGrid(int &x, int &y)
+void Grid::forceCoordsInGrid(int &x, int &y) const
 {
     if (x < gridLeft)
     {
@@ -235,7 +323,139 @@ void Grid::forceCoordsInGrid(int &x, int &y)
     }
 }
 
-bool Grid::sameCoords(const int coords1[2], const int coords2[2])
+bool Grid::sameCoords(const int coords1[2], const int coords2[2]) const
 {
     return (coords1[0] == coords2[0]) && (coords1[1] == coords2[1]);
+}
+
+void Grid::updateSelectedObj()
+{
+    if (selectModeLeftButtonClicked)
+    {
+        std::shared_ptr<Vertex> selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj);
+
+        if (selectedObjVertexCasted)
+        {
+            int selectedObjCoords[2];
+
+            selectedObjVertexCasted->getCoords(selectedObjCoords);
+
+            int cursorCoords[2];
+            Cursor::getScaledCursorPos(cursorCoords[0], cursorCoords[1]);
+            forceCoordsInGrid(cursorCoords[0], cursorCoords[1]);
+            windowCoordToGridCoord(cursorCoords[0], cursorCoords[1]);
+
+            selectedObjVertexCasted.get()->setX(cursorCoords[0]);
+            selectedObjVertexCasted.get()->setY(cursorCoords[1]);
+
+            if (cursorCoords[0] != selectedVertexOriginalCoords[0] ||
+                cursorCoords[1] != selectedVertexOriginalCoords[1])
+            {
+                if (!selectedVertexRemoved)
+                {
+                    vertexTree.remove(selectedObjVertexCasted->getId(), selectedVertexOriginalCoords);
+                    selectedVertexRemoved = true;
+                }
+
+                selectedVertexOriginalCoords[0] = cursorCoords[0];
+                selectedVertexOriginalCoords[1] = cursorCoords[1];
+            }
+        }
+        return;
+    }
+
+    int leftClickCoords[2];
+    Cursor::getScaledOnLeftClickPos(leftClickCoords[0], leftClickCoords[1]);
+    windowCoordToGridCoord(leftClickCoords[0], leftClickCoords[1]);
+
+    std::shared_ptr<Vertex> selectedVertex = vertexTree.proximitySearch(leftClickCoords, GRID_VERTEX_RADIUS);
+
+    if (selectedVertex)
+    {
+        selectedObj = selectedVertex;
+
+        selectedVertexOriginalCoords[0] = selectedVertex.get()->getX();
+        selectedVertexOriginalCoords[1] = selectedVertex.get()->getY();
+    }
+}
+
+// Return true if vertex was snapped to a neighbouring vertex
+// Return false if otherwise
+bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
+{
+    if (vertex == nullptr)
+    {
+        return false;
+    }
+
+    int coords[2];
+    vertex.get()->getCoords(coords);
+
+    vertex_id vertexId = vertex.get()->getId();
+
+    std::shared_ptr<Vertex> neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST, vertexId);
+
+    if (neighbourVertex)
+    {
+        vertex_id neighbourId = neighbourVertex->getId();
+
+        std::vector<wall_id> modifiedWalls;
+        std::vector<wall_id> removedWalls;
+
+        graph.modifyMapping(vertexId, neighbourId, modifiedWalls, removedWalls);
+
+        for (auto wallId : modifiedWalls)
+        {
+            std::shared_ptr<Wall> wall = wallTree.search(wallId);
+
+            if (wall)
+            {
+                if (wall.get()->getStartVertex().get()->getId() == vertexId)
+                {
+                    wall.get()->setStartVertex(neighbourVertex);
+                }
+                if (wall.get()->getEndVertex().get()->getId() == vertexId)
+                {
+                    wall.get()->setEndVertex(neighbourVertex);
+                }
+            }
+        }
+
+        for (auto wallId : removedWalls)
+        {
+            wallTree.remove(wallId);
+        }
+
+        vertexTree.remove(vertexId, coords);
+
+        vertex = neighbourVertex;
+
+        return true;
+    }
+
+    return false;
+}
+
+void Grid::updateSelectedObjOnSnap(std::shared_ptr<Vertex> &selectedObjVertexCasted)
+{
+    if (selectedObjVertexCasted == nullptr)
+    {
+        return;
+    }
+
+    selectedObj = selectedObjVertexCasted;
+
+    if (graph.contains(selectedObjVertexCasted->getId()))
+    {
+        selectedObj = selectedObjVertexCasted;
+    }
+    else
+    {
+        int coords[2];
+        selectedObjVertexCasted->getCoords(coords);
+
+        vertexTree.remove(selectedObjVertexCasted->getId(), coords);
+
+        selectedObj = nullptr;
+    }
 }

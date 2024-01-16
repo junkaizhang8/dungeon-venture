@@ -25,6 +25,6 @@ public:
     void close() override;
 
 private:
-    GameKeyEvent keys;      // Store key press statuses of movement keys
+    GameKeyEvent keys; // Store key press statuses of movement keys
     Player player;
 };

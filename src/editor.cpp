@@ -37,7 +37,7 @@ int Editor::init(int width, int height, int pixelScale, const char *title)
         close();
         return INIT_ERROR;
     }
-    
+
     glfwMakeContextCurrent(window);
 
     glfwSetWindowUserPointer(window, this);
@@ -54,7 +54,7 @@ int Editor::init(int width, int height, int pixelScale, const char *title)
     Cursor::setMouseButtonCallback(window);
     Cursor::setPixelScale(pixelScale);
 
-    grid.init(DEFAULT_GRID_LEFT, DEFAULT_GRID_RIGHT, DEFAULT_GRID_TOP, DEFAULT_GRID_BOTTOM, renderer);
+    grid.init(DEFAULT_GRID_LEFT, DEFAULT_GRID_RIGHT, DEFAULT_GRID_TOP, DEFAULT_GRID_BOTTOM, renderer.get());
 
     return INIT_SUCCESS;
 }
@@ -71,24 +71,26 @@ void Editor::update()
 }
 
 void Editor::display()
-{   
+{
     if (clock.updateFrame())
     {
         renderer.get()->clearScreen();
         grid.drawGrid();
 
-        // if (keys.qPressed())
-        // {
-        //     grid.selectMode();
-        // } else
-        // {
-        //     grid.cancelSelectMode();
-        // }
+        if (keys.qPressed())
+        {
+            grid.selectMode();
+        }
+        else
+        {
+            grid.cancelSelectMode();
+        }
 
         if (keys.fPressed())
         {
             grid.wallMode();
-        } else
+        }
+        else
         {
             grid.cancelWallMode();
         }
@@ -97,7 +99,7 @@ void Editor::display()
 
         glfwSwapBuffers(window);
     }
-    
+
     glfwPollEvents();
 }
 
