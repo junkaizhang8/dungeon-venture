@@ -18,15 +18,16 @@ public:
     Renderer() = default;
     ~Renderer() = default;
     void init(double left, double right, double bottom, double top, int scale);
-    void clearScreen();
-    void drawPixel(double x, double y, rgb_hex rgb = BLACK);
-    void drawQuad(double vertices[4][2], rgb_hex rgb = BLACK);
-    void drawRect(double x, double y, double width, double height, rgb_hex rgb = BLACK);
-    void drawFilledCircle(double x, double y, double r, rgb_hex = BLACK);
-    void drawHollowCircle(double x, double y, double r, rgb_hex = BLACK);
+    void clearScreen() const;
+    void drawPixel(double x, double y, rgb_hex rgb = BLACK) const;
+    void drawQuad(const double vertices[4][2], rgb_hex rgb = BLACK) const;
+    void drawRect(double x, double y, double width, double height, rgb_hex rgb = BLACK) const;
+    void drawFilledCircle(double x, double y, double r, rgb_hex = BLACK) const;
+    void drawHollowCircle(double x, double y, double r, rgb_hex = BLACK) const;
 
 private:
     int pixelScale;
     int pixelScaleHalf;
-    void setColour(rgb_hex rgb);
+
+    void setColour(rgb_hex rgb) const;
 };

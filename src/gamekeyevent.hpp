@@ -9,10 +9,10 @@ public:
     GameKeyEvent() = default;
     ~GameKeyEvent() override = default;
     void resetKeys() override;
-    bool wDown() { return w; }
-    bool sDown() { return s; }
-    bool aDown() { return a; }
-    bool dDown() { return d; }
+    bool wDown() const { return w; }
+    bool sDown() const { return s; }
+    bool aDown() const { return a; }
+    bool dDown() const { return d; }
 
 private:
     bool w = false;
@@ -21,5 +21,6 @@ private:
     bool d = false;
     bool left = false;
     bool right = false;
+    
     void handleKeyEvent(GLFWwindow *window, int key, int action) override;
 };

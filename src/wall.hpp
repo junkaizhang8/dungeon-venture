@@ -15,18 +15,16 @@ class Wall : public GridObject
 {
 public:
     Wall() : id(largestId++) {}
-    Wall(wall_id wallId, std::shared_ptr<Vertex> start, std::shared_ptr<Vertex> end) : id(wallId),\
-                                                                                       startVertex(start),\
-                                                                                       endVertex(end) {}
+    Wall(std::shared_ptr<Vertex> start, std::shared_ptr<Vertex> end)
+        : id(largestId++), startVertex(start), endVertex(end) {}
     ~Wall() override = default;
-    void drawObj(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) override;
-    void drawObjSelected(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) override;
+    void drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
+    void drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
     void resetVertices();
-    wall_id getId() { return id; }
-    void setId(wall_id newId) { id = newId; }
-    std::shared_ptr<Vertex> getStartVertex() { return startVertex; }
+    wall_id getId() const { return id; }
+    std::shared_ptr<Vertex> getStartVertex() const { return startVertex; }
     void setStartVertex(std::shared_ptr<Vertex> v) { startVertex = v; }
-    std::shared_ptr<Vertex> getEndVertex() { return endVertex; }
+    std::shared_ptr<Vertex> getEndVertex() const { return endVertex; }
     void setEndVertex(std::shared_ptr<Vertex> v) { endVertex = v; }
 
 private:

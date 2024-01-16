@@ -28,6 +28,6 @@ public:
     void close() override;
 
 private:
-    EditorKeyEvent keys;      // Store key press statuses of certain events
+    EditorKeyEvent keys; // Store key press statuses of certain events
     Grid grid;
 };

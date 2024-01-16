@@ -3,7 +3,7 @@
 
 wall_id Wall::largestId = 0;
 
-void Wall::drawObj(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom)
+void Wall::drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (renderer == nullptr)
     {
@@ -32,10 +32,10 @@ void Wall::drawObj(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRig
         {endCoords[0] - xOffset, endCoords[1] + yOffset}
     };
 
-    renderer.get()->drawQuad(vertices, WALL_COLOUR);
+    renderer->drawQuad(vertices, WALL_COLOUR);
 }
 
-void Wall::drawObjSelected(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom)
+void Wall::drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (renderer == nullptr)
     {
@@ -64,11 +64,11 @@ void Wall::drawObjSelected(std::shared_ptr<Renderer> renderer, int gridLeft, int
         {endCoords[0] - xOffset, endCoords[1] + yOffset}
     };
 
-    renderer.get()->drawQuad(vertices, WALL_SELECTED_COLOUR);
+    renderer->drawQuad(vertices, WALL_SELECTED_COLOUR);
 }
 
 void Wall::resetVertices()
 {
-    startVertex = nullptr;
-    endVertex = nullptr;
+    startVertex.reset();
+    endVertex.reset();
 }

@@ -4,6 +4,9 @@
 #include "game.hpp"
 #include "editor.hpp"
 #include "player.hpp"
+#include "vertextree.hpp"
+#include "vertexgraph.hpp"
+#include "walltree.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +19,6 @@ int main(int argc, char *argv[])
     }
 
     game.close();
-    
+
     return EXIT_SUCCESS;
 }

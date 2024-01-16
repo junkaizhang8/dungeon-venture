@@ -17,6 +17,7 @@ public:
     static bool rightButtonDown() { return right; }
     static bool mouseButtonDown() { return buttonDown; }
     static void getScaledOnLeftClickPos(int &x, int &y);
+    static void getScaledOnRightClickPos(int &x, int &y);
 
 private:
     static GLFWwindow *window;
@@ -26,4 +27,6 @@ private:
     static bool buttonDown;
     static int scaledOnLeftClickX;
     static int scaledOnLeftClickY;
+    static int scaledOnRightClickX;
+    static int scaledOnRightClickY;
 };

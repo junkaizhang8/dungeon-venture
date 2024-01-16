@@ -13,16 +13,18 @@ class Vertex : public GridObject
 {
 public:
     Vertex() : id(largestId++) {}
-    Vertex(int xpos, int ypos) : id(largestId++), x(xpos), y(ypos) {}
+    Vertex(int xpos, int ypos)
+        : id(largestId++), x(xpos), y(ypos) {}
     ~Vertex() override = default;
-    void drawObj(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) override;
-    void drawObjSelected(std::shared_ptr<Renderer> renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) override;
-    vertex_id getId() { return id; }
-    int getX() { return x; }
+    void drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
+    void drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
+    vertex_id getId() const { return id; }
+    void setId(vertex_id vertexId) { id = vertexId; }
+    int getX() const { return x; }
     void setX(int xpos) { x = xpos; }
-    int getY() { return y; }
+    int getY() const { return y; }
     void setY(int ypos) { y = ypos; }
-    void getCoords(int coords[2]);
+    void getCoords(int coords[2]) const;
 
 private:
     static vertex_id largestId;

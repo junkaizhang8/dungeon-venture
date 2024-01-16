@@ -13,6 +13,8 @@ bool Cursor::right = false;
 bool Cursor::buttonDown = false;
 int Cursor::scaledOnLeftClickX = 0;
 int Cursor::scaledOnLeftClickY = 0;
+int Cursor::scaledOnRightClickX = 0;
+int Cursor::scaledOnRightClickY = 0;
 
 void Cursor::checkMouseButtonEvent(GLFWwindow *w, int button, int action, int mods)
 {
@@ -28,24 +30,26 @@ void Cursor::checkMouseButtonEvent(GLFWwindow *w, int button, int action, int mo
         if (button == GLFW_MOUSE_BUTTON_LEFT)
         {
             left = true;
-            int &x = scaledOnLeftClickX;
-            int &y = scaledOnLeftClickY;
-            
-            getScaledCursorPos(x, y);
-        } else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+
+            getScaledCursorPos(scaledOnLeftClickX, scaledOnLeftClickY);
+        }
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
             right = true;
+
+            getScaledCursorPos(scaledOnRightClickX, scaledOnRightClickY);
         }
     }
 
     if (action == GLFW_RELEASE)
     {
         buttonDown = false;
-        
+
         if (button == GLFW_MOUSE_BUTTON_LEFT)
         {
             left = false;
-        } else if (button == GLFW_MOUSE_BUTTON_RIGHT)
+        }
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT)
         {
             right = false;
         }
@@ -74,4 +78,10 @@ void Cursor::getScaledOnLeftClickPos(int &x, int &y)
 {
     x = scaledOnLeftClickX;
     y = scaledOnLeftClickY;
+}
+
+void Cursor::getScaledOnRightClickPos(int &x, int &y)
+{
+    x = scaledOnRightClickX;
+    y = scaledOnRightClickY;
 }
