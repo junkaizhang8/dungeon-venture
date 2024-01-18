@@ -20,7 +20,7 @@ class Editor : public Window
 public:
     Editor() = default;
     ~Editor() override;
-    int init(int width, int height, int pixelScale, const char *title) override;
+    int init(int width, int height, int pixelScale, const char *const title) override;
     void run();
     void update();
     void display() override;

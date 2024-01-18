@@ -14,7 +14,7 @@ class Window
 public:
     Window() = default;
     virtual ~Window() = default;
-    virtual int init(int width, int height, int pixelScale, const char *title) = 0;
+    virtual int init(int width, int height, int pixelScale, const char *const title) = 0;
     virtual void display() = 0;
     virtual bool isRunning() = 0;
     virtual void close() = 0;
