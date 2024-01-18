@@ -19,11 +19,11 @@ public:
     ~Renderer() = default;
     void init(double left, double right, double bottom, double top, int scale);
     void clearScreen() const;
-    void drawPixel(double x, double y, rgb_hex rgb = BLACK) const;
-    void drawQuad(const double vertices[4][2], rgb_hex rgb = BLACK) const;
-    void drawRect(double x, double y, double width, double height, rgb_hex rgb = BLACK) const;
-    void drawFilledCircle(double x, double y, double r, rgb_hex = BLACK) const;
-    void drawHollowCircle(double x, double y, double r, rgb_hex = BLACK) const;
+    void drawPixel(double x, double y, rgb_hex rgb) const;
+    void drawQuad(const double vertices[4][2], rgb_hex rgb) const;
+    void drawRect(double x, double y, double width, double height, rgb_hex rgb) const;
+    void drawFilledCircle(double x, double y, double r, rgb_hex rgb) const;
+    void drawHollowCircle(double x, double y, double r, rgb_hex rgb) const;
 
 private:
     int pixelScale;

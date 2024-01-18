@@ -16,7 +16,7 @@ Editor::~Editor()
     std::cout << "Editor window destroyed successfully." << std::endl;
 }
 
-int Editor::init(int width, int height, int pixelScale, const char *title)
+int Editor::init(int width, int height, int pixelScale, const char *const title)
 {
     if (!glfwInit())
     {
@@ -46,7 +46,7 @@ int Editor::init(int width, int height, int pixelScale, const char *title)
 
     renderer = std::make_shared<Renderer>();
 
-    renderer.get()->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
+    renderer->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
 
     KeyEvent::setKeyEvent(&keys);
     KeyEvent::setKeyCallback(window);
@@ -74,7 +74,7 @@ void Editor::display()
 {
     if (clock.updateFrame())
     {
-        renderer.get()->clearScreen();
+        renderer->clearScreen();
         grid.drawGrid();
 
         if (keys.qPressed())

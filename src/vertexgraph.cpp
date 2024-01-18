@@ -1,11 +1,13 @@
+#include <memory>
+#include <map>
 #include "vertex.hpp"
 #include "vertexgraph.hpp"
 
 // Insert a mapping between the start vertex and end vertex of wall
-void VertexGraph::insertMapping(Wall &wall)
+void VertexGraph::insertMapping(const Wall &wall)
 {
-    vertex_id startVertexId = wall.getStartVertex().get()->getId();
-    vertex_id endVertexId = wall.getEndVertex().get()->getId();
+    vertex_id startVertexId = wall.getStartVertex()->getId();
+    vertex_id endVertexId = wall.getEndVertex()->getId();
     wall_id wallId = wall.getId();
 
     map[startVertexId][endVertexId] = wallId;
@@ -114,14 +116,14 @@ void VertexGraph::modifyMapping(vertex_id v1, vertex_id v2, std::vector<wall_id>
 
 // Return true if vertexId is a vertex in the graph
 // Return false otherwise
-bool VertexGraph::contains(vertex_id vertexId)
+bool VertexGraph::contains(vertex_id vertexId) const
 {
     return (map.find(vertexId) != map.end());
 }
 
 // Return true if the mapping between v1 and v2 is in the graph
 // Return false otherwise
-bool VertexGraph::contains(vertex_id v1, vertex_id v2)
+bool VertexGraph::contains(vertex_id v1, vertex_id v2) const
 {
     if (map.find(v1) != map.end())
     {

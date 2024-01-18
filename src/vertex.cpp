@@ -3,7 +3,7 @@
 
 vertex_id Vertex::largestId = 0;
 
-void Vertex::drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
+void Vertex::drawObj(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (renderer == nullptr)
     {

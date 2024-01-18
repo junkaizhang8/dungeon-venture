@@ -46,7 +46,7 @@ int Game::init(int width, int height, int pixelScale, const char *title)
 
     renderer = std::make_shared<Renderer>();
 
-    renderer.get()->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
+    renderer->init(0.0, (double)scaledWidth, (double)scaledHeight, 0.0, pixelScale);
 
     KeyEvent::setKeyEvent(&keys);
     KeyEvent::setKeyCallback(window);
@@ -66,9 +66,9 @@ void Game::display()
     if (clock.updateFrame())
     {
         player.updatePosition(keys);
-        renderer.get()->clearScreen();
-        renderer.get()->drawPixel(player.getX(), player.getY());
-        renderer.get()->drawHollowCircle(100, 30, 1);
+        renderer->clearScreen();
+        renderer->drawPixel(player.getX(), player.getY(), GREEN);
+        renderer->drawHollowCircle(100, 30, 1, GREEN);
         glfwSwapBuffers(window);
     }
     glfwPollEvents();

@@ -1,8 +1,7 @@
-#include <iostream>
 #include <memory>
 #include "vertex.hpp"
-#include "vertextree.hpp"
 #include "renderer.hpp"
+#include "vertextree.hpp"
 
 void VertexTree::insert(const std::shared_ptr<Vertex> &newVertex)
 {
@@ -19,18 +18,18 @@ std::shared_ptr<Vertex> VertexTree::search(const int coords[2]) const
     return search(root, coords, 0);
 }
 
-std::shared_ptr<Vertex> VertexTree::proximitySearch(const int coords[2], double dist, int vertexId)
+std::shared_ptr<Vertex> VertexTree::proximitySearch(const int coords[2], double dist) const
 {
     if (dist < 0)
     {
         return nullptr;
     }
 
-    return proximitySearch(root, coords, dist * dist, vertexId, 0);
+    return proximitySearch(root, coords, dist * dist, 0);
 }
 
-void VertexTree::drawVertices(const Renderer *renderer, int gridLeft, int gridRight,
-                              int gridTop, int gridBottom)
+void VertexTree::drawVertices(const Renderer *const renderer, int gridLeft, int gridRight,
+                              int gridTop, int gridBottom) const
 {
     drawVertices(root, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
@@ -44,10 +43,10 @@ void VertexTree::insert(std::unique_ptr<VertexNode> &node, const std::shared_ptr
         return;
     }
 
-    std::shared_ptr<Vertex> vertex = node.get()->vertex;
+    std::shared_ptr<Vertex> vertex = node->vertex;
 
     // If there already exists a vertex at the same coordinate, do not insert newVertex
-    if (newVertex.get()->getX() == vertex.get()->getX() && newVertex.get()->getY() == vertex.get()->getY())
+    if (newVertex->getX() == vertex->getX() && newVertex->getY() == vertex->getY())
     {
         return;
     }
@@ -55,29 +54,29 @@ void VertexTree::insert(std::unique_ptr<VertexNode> &node, const std::shared_ptr
     // If depth is even, check x-coordinate. If depth is odd, check y-coordinate.
     if (!(depth % 2))
     {
-        if (newVertex.get()->getX() <= vertex.get()->getX())
+        if (newVertex->getX() <= vertex->getX())
         {
-            insert(node.get()->left, newVertex, depth + 1);
+            insert(node->left, newVertex, depth + 1);
         }
         else
         {
-            insert(node.get()->right, newVertex, depth + 1);
+            insert(node->right, newVertex, depth + 1);
         }
     }
     else
     {
-        if (newVertex.get()->getY() <= vertex.get()->getY())
+        if (newVertex->getY() <= vertex->getY())
         {
-            insert(node.get()->left, newVertex, depth + 1);
+            insert(node->left, newVertex, depth + 1);
         }
         else
         {
-            insert(node.get()->right, newVertex, depth + 1);
+            insert(node->right, newVertex, depth + 1);
         }
     }
 }
 
-std::unique_ptr<VertexTree::VertexNode> VertexTree::remove(std::unique_ptr<VertexNode> &node,\
+std::unique_ptr<VertexTree::VertexNode> VertexTree::remove(std::unique_ptr<VertexNode> &node,
                                                            int id, const int coords[2], unsigned depth)
 {
     if (node == nullptr)
@@ -87,33 +86,33 @@ std::unique_ptr<VertexTree::VertexNode> VertexTree::remove(std::unique_ptr<Verte
 
     int dimension = depth % 2;
 
-    std::shared_ptr<Vertex> &vertex = node.get()->vertex;
+    std::shared_ptr<Vertex> &vertex = node->vertex;
 
-    if (vertex.get()->getId() == id)
+    if (vertex->getId() == id)
     {
-        if (node.get()->right != nullptr)
+        if (node->right != nullptr)
         {
-            std::shared_ptr<Vertex> min = findMin(node.get()->right, dimension, depth + 1);
+            std::shared_ptr<Vertex> min = findMin(node->right, dimension, depth + 1);
 
-            node.get()->vertex = min;
+            node->vertex = min;
 
             int minCoords[2];
             min->getCoords(minCoords);
 
-            std::unique_ptr<VertexNode> removedNode = remove(node.get()->right, min->getId(), minCoords, depth + 1);
-            node.get()->right = std::move(removedNode);
+            std::unique_ptr<VertexNode> removedNode = remove(node->right, min->getId(), minCoords, depth + 1);
+            node->right = std::move(removedNode);
         }
-        else if (node.get()->left != nullptr)
+        else if (node->left != nullptr)
         {
-            std::shared_ptr<Vertex> min = findMin(node.get()->left, dimension, depth + 1);
+            std::shared_ptr<Vertex> min = findMin(node->left, dimension, depth + 1);
 
-            node.get()->vertex = min;
+            node->vertex = min;
 
             int minCoords[2];
             min->getCoords(minCoords);
 
-            std::unique_ptr<VertexNode> removedNode = remove(node.get()->left, min->getId(), minCoords, depth + 1);
-            node.get()->right = std::move(removedNode);
+            std::unique_ptr<VertexNode> removedNode = remove(node->left, min->getId(), minCoords, depth + 1);
+            node->right = std::move(removedNode);
         }
         else
         {
@@ -126,24 +125,24 @@ std::unique_ptr<VertexTree::VertexNode> VertexTree::remove(std::unique_ptr<Verte
     // If depth is even, check x-coordinate. If depth is odd, check y-coordinate.
     if (!dimension)
     {
-        if (coords[0] <= vertex.get()->getX())
+        if (coords[0] <= vertex->getX())
         {
-            node.get()->left = remove(node.get()->left, id, coords, depth + 1);
+            node->left = remove(node->left, id, coords, depth + 1);
         }
         else
         {
-            node.get()->right = remove(node.get()->right, id, coords, depth + 1);
+            node->right = remove(node->right, id, coords, depth + 1);
         }
     }
     else
     {
-        if (coords[1] <= vertex.get()->getY())
+        if (coords[1] <= vertex->getY())
         {
-            node.get()->left = remove(node.get()->left, id, coords, depth + 1);
+            node->left = remove(node->left, id, coords, depth + 1);
         }
         else
         {
-            node.get()->right = remove(node.get()->right, id, coords, depth + 1);
+            node->right = remove(node->right, id, coords, depth + 1);
         }
     }
 
@@ -158,53 +157,53 @@ std::shared_ptr<Vertex> VertexTree::search(const std::unique_ptr<VertexNode> &no
         return nullptr;
     }
 
-    std::shared_ptr<Vertex> vertex = node.get()->vertex;
+    std::shared_ptr<Vertex> vertex = node->vertex;
 
-    if (coords[0] == vertex.get()->getX() && coords[1] == vertex.get()->getY())
+    if (coords[0] == vertex->getX() && coords[1] == vertex->getY())
     {
         return vertex;
     }
 
     if (!(depth % 2))
     {
-        if (coords[0] <= vertex.get()->getX())
+        if (coords[0] <= vertex->getX())
         {
-            return search(node.get()->left, coords, depth + 1);
+            return search(node->left, coords, depth + 1);
         }
         else
         {
-            return search(node.get()->right, coords, depth + 1);
+            return search(node->right, coords, depth + 1);
         }
     }
     else
     {
-        if (coords[1] <= vertex.get()->getY())
+        if (coords[1] <= vertex->getY())
         {
-            return search(node.get()->left, coords, depth + 1);
+            return search(node->left, coords, depth + 1);
         }
         else
         {
-            return search(node.get()->right, coords, depth + 1);
+            return search(node->right, coords, depth + 1);
         }
     }
 }
 
 std::shared_ptr<Vertex> VertexTree::proximitySearch(const std::unique_ptr<VertexNode> &node, const int coords[2],
-                                                    double distSquared, vertex_id vertexId, unsigned depth) const
+                                                    double distSquared, unsigned depth) const
 {
     if (node == nullptr)
     {
         return nullptr;
     }
 
-    std::shared_ptr<Vertex> vertex = node.get()->vertex;
+    std::shared_ptr<Vertex> vertex = node->vertex;
 
-    int x = vertex.get()->getX();
-    int y = vertex.get()->getY();
+    int x = vertex->getX();
+    int y = vertex->getY();
     int dx = x - coords[0];
     int dy = y - coords[1];
 
-    if ((dx * dx) + (dy * dy) <= distSquared && node->vertex->getId() != vertexId)
+    if ((dx * dx) + (dy * dy) <= distSquared)
     {
         return vertex;
     }
@@ -213,27 +212,27 @@ std::shared_ptr<Vertex> VertexTree::proximitySearch(const std::unique_ptr<Vertex
     {
         if (coords[0] <= x)
         {
-            return proximitySearch(node.get()->left, coords, distSquared, vertexId, depth + 1);
+            return proximitySearch(node->left, coords, distSquared, depth + 1);
         }
         else
         {
-            return proximitySearch(node.get()->right, coords, distSquared, vertexId, depth + 1);
+            return proximitySearch(node->right, coords, distSquared, depth + 1);
         }
     }
     else
     {
         if (coords[1] <= y)
         {
-            return proximitySearch(node.get()->left, coords, distSquared, vertexId, depth + 1);
+            return proximitySearch(node->left, coords, distSquared, depth + 1);
         }
         else
         {
-            return proximitySearch(node.get()->right, coords, distSquared, vertexId, depth + 1);
+            return proximitySearch(node->right, coords, distSquared, depth + 1);
         }
     }
 }
 
-void VertexTree::drawVertices(std::unique_ptr<VertexNode> &node, const Renderer *renderer,
+void VertexTree::drawVertices(const std::unique_ptr<VertexNode> &node, const Renderer *const renderer,
                               int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (node == nullptr)
@@ -241,12 +240,12 @@ void VertexTree::drawVertices(std::unique_ptr<VertexNode> &node, const Renderer 
         return;
     }
 
-    drawVertices(node.get()->left, renderer, gridLeft, gridRight, gridTop, gridBottom);
-    node.get()->vertex.get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-    drawVertices(node.get()->right, renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawVertices(node->left, renderer, gridLeft, gridRight, gridTop, gridBottom);
+    node->vertex->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawVertices(node->right, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
 
-std::shared_ptr<Vertex> VertexTree::findMin(std::unique_ptr<VertexNode> &node, int dimension, unsigned depth)
+std::shared_ptr<Vertex> VertexTree::findMin(const std::unique_ptr<VertexNode> &node, int dimension, unsigned depth)
 {
     if (node == nullptr)
     {
@@ -258,22 +257,25 @@ std::shared_ptr<Vertex> VertexTree::findMin(std::unique_ptr<VertexNode> &node, i
     if (currentDimension == dimension)
     {
         // There are no vertices with a smaller value at the corresponding dimension
-        if (node.get()->left == nullptr)
+        if (node->left == nullptr)
         {
-            return node.get()->vertex;
+            return node->vertex;
         }
 
-        return findMin(node.get()->left, dimension, depth + 1);
+        return findMin(node->left, dimension, depth + 1);
     }
 
     // Minimum can be any of the nodes in the subtree
-    return determineMin(node.get()->vertex,
-                        findMin(node.get()->left, dimension, depth + 1),
-                        findMin(node.get()->right, dimension, depth + 1), dimension);
+    return determineMin(node->vertex,
+                        findMin(node->left, dimension, depth + 1),
+                        findMin(node->right, dimension, depth + 1), dimension);
 }
 
 // Determines the minimum vertex at dimension out of v1, v2, and v3
-std::shared_ptr<Vertex> VertexTree::determineMin(std::shared_ptr<Vertex> v1, std::shared_ptr<Vertex> v2, std::shared_ptr<Vertex> v3, int dimension)
+std::shared_ptr<Vertex> VertexTree::determineMin(const std::shared_ptr<Vertex> &v1,
+                                                 const std::shared_ptr<Vertex> &v2,
+                                                 const std::shared_ptr<Vertex> &v3,
+                                                 int dimension)
 {
     std::shared_ptr<Vertex> minVertex = v1;
 

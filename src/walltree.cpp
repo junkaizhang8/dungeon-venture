@@ -1,5 +1,4 @@
 #include <memory>
-#include <iostream>
 #include "walltree.hpp"
 
 // Insert newWall into the tree.
@@ -18,7 +17,7 @@ std::shared_ptr<Wall> WallTree::search(wall_id id) const
     return search(root, id);
 }
 
-void WallTree::drawWalls(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom)
+void WallTree::drawWalls(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     drawWalls(root, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
@@ -31,7 +30,7 @@ void WallTree::insert(std::unique_ptr<WallNode> &node, const std::shared_ptr<Wal
         return;
     }
 
-    insert((newWall.get()->getId() <= node.get()->wall.get()->getId()) ? node.get()->left : node.get()->right, newWall);
+    insert((newWall->getId() <= node->wall->getId()) ? node->left : node->right, newWall);
 }
 
 std::unique_ptr<WallTree::WallNode> WallTree::remove(std::unique_ptr<WallNode> &node, wall_id id)
@@ -41,35 +40,35 @@ std::unique_ptr<WallTree::WallNode> WallTree::remove(std::unique_ptr<WallNode> &
         return nullptr;
     }
 
-    if (id < node.get()->wall.get()->getId())
+    if (id < node->wall->getId())
     {
-        node.get()->left = remove(node.get()->left, id);
+        node->left = remove(node->left, id);
         return std::move(node);
     }
 
-    if (id > node.get()->wall.get()->getId())
+    if (id > node->wall->getId())
     {
-        node.get()->right = remove(node.get()->right, id);
+        node->right = remove(node->right, id);
         return std::move(node);
     }
 
     // Left child does not exist
-    if (node.get()->left == nullptr)
+    if (node->left == nullptr)
     {
-        return std::move(node.get()->right);
+        return std::move(node->right);
     }
 
     // Right child does not exist
-    if (node.get()->right == nullptr)
+    if (node->right == nullptr)
     {
-        return std::move(node.get()->left);
+        return std::move(node->left);
     }
 
     // Both children exist
     std::shared_ptr<Wall> wall = findMin(node);
 
-    node.get()->wall = wall;
-    node.get()->right = remove(node.get()->right, wall->getId());
+    node->wall = wall;
+    node->right = remove(node->right, wall->getId());
     return std::move(node);
 }
 
@@ -80,45 +79,45 @@ std::shared_ptr<Wall> WallTree::search(const std::unique_ptr<WallNode> &node, wa
         return nullptr;
     }
 
-    wall_id wallId = node.get()->wall.get()->getId();
+    wall_id wallId = node->wall->getId();
 
     if (id == wallId)
     {
-        return node.get()->wall;
+        return node->wall;
     }
     
-    return search((id <= wallId) ? node.get()->left : node.get()->right, id);
+    return search((id <= wallId) ? node->left : node->right, id);
 }
 
-void WallTree::drawWalls(std::unique_ptr<WallNode> &node, const Renderer *renderer,
-                         int gridLeft, int gridRight, int gridTop, int gridBottom)
+void WallTree::drawWalls(const std::unique_ptr<WallNode> &node, const Renderer *const renderer,
+                         int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (node == nullptr)
     {
         return;
     }
 
-    drawWalls(node.get()->left, renderer, gridLeft, gridRight, gridTop, gridBottom);
-    node.get()->wall.get()->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
-    drawWalls(node.get()->right, renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawWalls(node->left, renderer, gridLeft, gridRight, gridTop, gridBottom);
+    node->wall->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawWalls(node->right, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
 
-std::shared_ptr<Wall> WallTree::findMin(std::unique_ptr<WallNode> &node)
+std::shared_ptr<Wall> WallTree::findMin(const std::unique_ptr<WallNode> &node) const
 {
     if (node == nullptr)
     {
         return nullptr;
     }
 
-    if (node.get()->left == nullptr && node.get()->right == nullptr)
+    if (node->left == nullptr && node->right == nullptr)
     {
-        return node.get()->wall;
+        return node->wall;
     }
 
-    if (node.get()->left)
+    if (node->left)
     {
-        return findMin(node.get()->left);
+        return findMin(node->left);
     }
 
-    return findMin(node.get()->right);
+    return findMin(node->right);
 }

@@ -8,8 +8,8 @@ public:
     EditorKeyEvent() = default;
     ~EditorKeyEvent() override = default;
     void resetKeys() override;
-    bool qPressed() { return q; }
-    bool fPressed() { return f; }
+    bool qPressed() const { return q; }
+    bool fPressed() const { return f; }
 
 private:
     bool q = false;

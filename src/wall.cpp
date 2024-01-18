@@ -3,7 +3,7 @@
 
 wall_id Wall::largestId = 0;
 
-void Wall::drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
+void Wall::drawObj(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (renderer == nullptr)
     {
@@ -13,8 +13,8 @@ void Wall::drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gr
     int startCoords[2] = {};
     int endCoords[2] = {};
 
-    startVertex.get()->getCoords(startCoords);
-    endVertex.get()->getCoords(endCoords);
+    startVertex->getCoords(startCoords);
+    endVertex->getCoords(endCoords);
     getObjPosRelativeToWindow(startCoords, gridLeft, gridRight, gridTop, gridBottom);
     getObjPosRelativeToWindow(endCoords, gridLeft, gridRight, gridTop, gridBottom);
 
@@ -35,7 +35,7 @@ void Wall::drawObj(const Renderer *renderer, int gridLeft, int gridRight, int gr
     renderer->drawQuad(vertices, WALL_COLOUR);
 }
 
-void Wall::drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
+void Wall::drawObjSelected(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
 {
     if (renderer == nullptr)
     {
@@ -45,8 +45,8 @@ void Wall::drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight
     int startCoords[2] = {};
     int endCoords[2] = {};
 
-    startVertex.get()->getCoords(startCoords);
-    endVertex.get()->getCoords(endCoords);
+    startVertex->getCoords(startCoords);
+    endVertex->getCoords(endCoords);
     getObjPosRelativeToWindow(startCoords, gridLeft, gridRight, gridTop, gridBottom);
     getObjPosRelativeToWindow(endCoords, gridLeft, gridRight, gridTop, gridBottom);
 
