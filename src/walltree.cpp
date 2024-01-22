@@ -65,7 +65,7 @@ std::unique_ptr<WallTree::WallNode> WallTree::remove(std::unique_ptr<WallNode> &
     }
 
     // Both children exist
-    std::shared_ptr<Wall> wall = findMin(node);
+    std::shared_ptr<Wall> wall = findMin(node->right);
 
     node->wall = wall;
     node->right = remove(node->right, wall->getId());

@@ -1,3 +1,6 @@
 .vscode
 *.dSYM
 .depend
+build/
+test/build/
+test/output/

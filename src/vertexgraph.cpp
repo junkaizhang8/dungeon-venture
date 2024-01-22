@@ -1,5 +1,6 @@
 #include <memory>
 #include <map>
+#include <iostream>
 #include "vertex.hpp"
 #include "vertexgraph.hpp"
 
@@ -129,6 +130,5 @@ bool VertexGraph::contains(vertex_id v1, vertex_id v2) const
     {
         return (map.at(v1).find(v2) != map.at(v1).end());
     }
-
     return false;
 }

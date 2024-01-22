@@ -269,7 +269,7 @@ void Grid::gridCoordToWindowCoord(int &x, int &y) const
     y += gridBottom / 2;
 }
 
-// Make a new wall determined by the cursor action
+// Make a new wall determined by the cursor action.
 void Grid::makeNewWall()
 {
     int coords[2];
@@ -294,7 +294,7 @@ void Grid::makeNewWall()
         }
         else
         {
-            newWall->setStartVertex(std::make_shared<Vertex>(coords[0], coords[1]));
+            newWall->setStartVertex(std::make_shared<Vertex>(coords));
         }
     }
 
@@ -302,7 +302,7 @@ void Grid::makeNewWall()
     // Else, update its position using coords
     if (newWall->getEndVertex() == nullptr)
     {
-        newWall->setEndVertex(std::make_shared<Vertex>(coords[0], coords[1]));
+        newWall->setEndVertex(std::make_shared<Vertex>(coords));
     }
     else
     {
@@ -391,7 +391,7 @@ bool Grid::sameCoords(const int coord1[2], const int coord2[2]) const
     return (coord1[0] == coord2[0]) && (coord1[1] == coord2[1]);
 }
 
-// Update selectedObj determined by the cursor action
+// Update selectedObj determined by the cursor action.
 void Grid::updateSelectedObj()
 {
     if (selectModeLeftButtonClicked)
