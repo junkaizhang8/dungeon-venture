@@ -15,6 +15,8 @@ public:
     Vertex() : id(largestId++) {}
     Vertex(int xpos, int ypos)
         : id(largestId++), x(xpos), y(ypos) {}
+    Vertex(const int coords[2])
+        : id(largestId++), x(coords[0]), y(coords[1]) {}
     ~Vertex() override = default;
     void drawObj(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
     void drawObjSelected(const Renderer *renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const override;
