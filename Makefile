@@ -35,10 +35,10 @@ $(TEST_ALL_COMMAND) : $(TEST_ALL)
 $(TEST_ALL) : $(TEST_OBJS) $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
 
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(COMPILER) $(COMPILER_FLAGS) $(INCLUDE_PATHS) -c $< -o $@
 
-$(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp
+$(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp | $(TEST_BUILD_DIR)
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) -c $< -o $@
 
 # Individually compile test file into TEST_OUTPUT_DIR through their prefix name (e.g. for file x.test.cpp, we type `make x.test`)
@@ -47,6 +47,12 @@ $(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp
 
 $(TEST_OUTPUT_DIR)/% : $(TEST_BUILD_DIR)/%.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
+
+$(BUILD_DIR):
+	mkdir $(BUILD_DIR)
+
+$(TEST_BUILD_DIR)
+	mkdir $(TEST_BUILD_DIR)
 
 clean : clean_editor clean_test
 .PHONY: clean
