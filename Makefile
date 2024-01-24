@@ -48,10 +48,10 @@ $(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp | $(TEST_BUILD_DIR)
 $(TEST_OUTPUT_DIR)/% : $(TEST_BUILD_DIR)/%.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
 
-$(BUILD_DIR):
+$(BUILD_DIR) :
 	mkdir $(BUILD_DIR)
 
-$(TEST_BUILD_DIR)
+$(TEST_BUILD_DIR) :
 	mkdir $(TEST_BUILD_DIR)
 
 clean : clean_editor clean_test
