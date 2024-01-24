@@ -27,14 +27,14 @@ protected:
 TEST_F(WallTreeTest, TestInsertIntoEmptyTree)
 {
     emptyTree.insert(w1);
-    ASSERT_EQ(emptyTree.search(w1->getId())->getId(), w1->getId());
+    ASSERT_EQ(emptyTree.search(w1->getId()).get(), w1.get());
 }
 
 // Test if a wall is properly inserted into a single-node tree
 TEST_F(WallTreeTest, TestInsertIntoSingleNodeTree)
 {
     singleNodeTree.insert(w2);
-    ASSERT_EQ(singleNodeTree.search(w2->getId())->getId(), w2->getId());
+    ASSERT_EQ(singleNodeTree.search(w2->getId()).get(), w2.get());
 }
 
 // Test if a wall is properly inserted into a multi-node tree
@@ -43,7 +43,7 @@ TEST_F(WallTreeTest, TestInsertIntoMultipleNodeTree)
     const std::shared_ptr<Wall> wall = std::make_shared<Wall>();
 
     multipleNodeTree.insert(wall);
-    ASSERT_EQ(multipleNodeTree.search(wall->getId())->getId(), wall->getId());
+    ASSERT_EQ(multipleNodeTree.search(wall->getId()).get(), wall.get());
 }
 
 // Test if a wall is properly removed from a single-node tree
@@ -57,9 +57,9 @@ TEST_F(WallTreeTest, TestRemoveFromSingleNodeTree)
 TEST_F(WallTreeTest, TestRemoveLeaf)
 {
     multipleNodeTree.remove(w1->getId());
-    EXPECT_EQ(multipleNodeTree.search(w2->getId())->getId(), w2->getId());
-    EXPECT_EQ(multipleNodeTree.search(w3->getId())->getId(), w3->getId());
-    EXPECT_EQ(multipleNodeTree.search(w4->getId())->getId(), w4->getId());
+    EXPECT_EQ(multipleNodeTree.search(w2->getId()).get(), w2.get());
+    EXPECT_EQ(multipleNodeTree.search(w3->getId()).get(), w3.get());
+    EXPECT_EQ(multipleNodeTree.search(w4->getId()).get(), w4.get());
     ASSERT_EQ(multipleNodeTree.search(w1->getId()), nullptr);
 }
 
@@ -67,9 +67,9 @@ TEST_F(WallTreeTest, TestRemoveLeaf)
 TEST_F(WallTreeTest, TestRemoveOneChildNode)
 {
     multipleNodeTree.remove(w2->getId());
-    EXPECT_EQ(multipleNodeTree.search(w1->getId())->getId(), w1->getId());
-    EXPECT_EQ(multipleNodeTree.search(w3->getId())->getId(), w3->getId());
-    EXPECT_EQ(multipleNodeTree.search(w4->getId())->getId(), w4->getId());
+    EXPECT_EQ(multipleNodeTree.search(w1->getId()).get(), w1.get());
+    EXPECT_EQ(multipleNodeTree.search(w3->getId()).get(), w3.get());
+    EXPECT_EQ(multipleNodeTree.search(w4->getId()).get(), w4.get());
     ASSERT_EQ(multipleNodeTree.search(w2->getId()), nullptr);
 }
 
@@ -77,9 +77,9 @@ TEST_F(WallTreeTest, TestRemoveOneChildNode)
 TEST_F(WallTreeTest, TestRemoveTwoChildrenNode)
 {
     multipleNodeTree.remove(w3->getId());
-    EXPECT_EQ(multipleNodeTree.search(w1->getId())->getId(), w1->getId());
-    EXPECT_EQ(multipleNodeTree.search(w2->getId())->getId(), w2->getId());
-    EXPECT_EQ(multipleNodeTree.search(w4->getId())->getId(), w4->getId());
+    EXPECT_EQ(multipleNodeTree.search(w1->getId()).get(), w1.get());
+    EXPECT_EQ(multipleNodeTree.search(w2->getId()).get(), w2.get());
+    EXPECT_EQ(multipleNodeTree.search(w4->getId()).get(), w4.get());
     ASSERT_EQ(multipleNodeTree.search(w3->getId()), nullptr);
 }
 
@@ -92,7 +92,7 @@ TEST_F(WallTreeTest, TestSearchEmptyTree)
 // Test if search returns the proper wall for a single-node tree given wall id
 TEST_F(WallTreeTest, TestSingleNodeTreeSearchCorrectId)
 {
-    ASSERT_EQ(singleNodeTree.search(w1->getId())->getId(), w1->getId());
+    ASSERT_EQ(singleNodeTree.search(w1->getId()).get(), w1.get());
 }
 
 // Test if search returns no vertex for a single-node tree given wrong wall id
@@ -104,7 +104,7 @@ TEST_F(WallTreeTest, TestSingleNodeTreeSearchIncorrectId)
 // Test if search returns the proper vertex for a multi-node tree given wall id
 TEST_F(WallTreeTest, TestMultipleNodeTreeSearchCorrectId)
 {
-    ASSERT_EQ(multipleNodeTree.search(w2->getId())->getId(), w2->getId());
+    ASSERT_EQ(multipleNodeTree.search(w2->getId()).get(), w2.get());
 }
 
 // Test if search returns no vertex for a multi-node tree given wrong wall id

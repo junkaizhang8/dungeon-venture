@@ -30,14 +30,14 @@ protected:
 TEST_F(VertexTreeTest, TestInsertIntoEmptyTree)
 {
     emptyTree.insert(v1);
-    ASSERT_EQ(emptyTree.search(c1)->getId(), v1->getId());
+    ASSERT_EQ(emptyTree.search(c1).get(), v1.get());
 }
 
 // Test if a vertex is properly inserted into a single-node tree
 TEST_F(VertexTreeTest, TestInsertIntoSingleNodeTree)
 {
     singleNodeTree.insert(v2);
-    ASSERT_EQ(singleNodeTree.search(c2)->getId(), v2->getId());
+    ASSERT_EQ(singleNodeTree.search(c2).get(), v2.get());
 }
 
 // Test if a vertex is properly inserted into a multi-node tree
@@ -47,7 +47,7 @@ TEST_F(VertexTreeTest, TestInsertIntoMultipleNodeTree)
     const std::shared_ptr<Vertex> vertex = std::make_shared<Vertex>(coords);
 
     multipleNodeTree.insert(vertex);
-    ASSERT_EQ(multipleNodeTree.search(coords)->getId(), vertex->getId());
+    ASSERT_EQ(multipleNodeTree.search(coords).get(), vertex.get());
 }
 
 // Test if a vertex is properly removed from a single-node tree
@@ -61,9 +61,9 @@ TEST_F(VertexTreeTest, TestRemoveFromSingleNodeTree)
 TEST_F(VertexTreeTest, TestRemoveLeaf)
 {
     multipleNodeTree.remove(v4->getId(), c4);
-    EXPECT_EQ(multipleNodeTree.search(c1)->getId(), v1->getId());
-    EXPECT_EQ(multipleNodeTree.search(c2)->getId(), v2->getId());
-    EXPECT_EQ(multipleNodeTree.search(c3)->getId(), v3->getId());
+    EXPECT_EQ(multipleNodeTree.search(c1).get(), v1.get());
+    EXPECT_EQ(multipleNodeTree.search(c2).get(), v2.get());
+    EXPECT_EQ(multipleNodeTree.search(c3).get(), v3.get());
     ASSERT_EQ(multipleNodeTree.search(c4), nullptr);
 }
 
@@ -71,9 +71,9 @@ TEST_F(VertexTreeTest, TestRemoveLeaf)
 TEST_F(VertexTreeTest, TestRemoveOneChildNode)
 {
     multipleNodeTree.remove(v2->getId(), c2);
-    EXPECT_EQ(multipleNodeTree.search(c1)->getId(), v1->getId());
-    EXPECT_EQ(multipleNodeTree.search(c3)->getId(), v3->getId());
-    EXPECT_EQ(multipleNodeTree.search(c4)->getId(), v4->getId());
+    EXPECT_EQ(multipleNodeTree.search(c1).get(), v1.get());
+    EXPECT_EQ(multipleNodeTree.search(c3).get(), v3.get());
+    EXPECT_EQ(multipleNodeTree.search(c4).get(), v4.get());
     ASSERT_EQ(multipleNodeTree.search(c2), nullptr);
 }
 
@@ -81,9 +81,9 @@ TEST_F(VertexTreeTest, TestRemoveOneChildNode)
 TEST_F(VertexTreeTest, TestRemoveTwoChildrenNode)
 {
     multipleNodeTree.remove(v1->getId(), c1);
-    EXPECT_EQ(multipleNodeTree.search(c2)->getId(), v2->getId());
-    EXPECT_EQ(multipleNodeTree.search(c3)->getId(), v3->getId());
-    EXPECT_EQ(multipleNodeTree.search(c4)->getId(), v4->getId());
+    EXPECT_EQ(multipleNodeTree.search(c2).get(), v2.get());
+    EXPECT_EQ(multipleNodeTree.search(c3).get(), v3.get());
+    EXPECT_EQ(multipleNodeTree.search(c4).get(), v4.get());
     ASSERT_EQ(multipleNodeTree.search(c1), nullptr);
 }
 
@@ -96,7 +96,7 @@ TEST_F(VertexTreeTest, TestSearchEmptyTree)
 // Test if search returns the proper vertex for a single-node tree given vertex coords
 TEST_F(VertexTreeTest, TestSingleNodeTreeSearchCorrectCoords)
 {
-    ASSERT_EQ(singleNodeTree.search(c1)->getId(), v1->getId());
+    ASSERT_EQ(singleNodeTree.search(c1).get(), v1.get());
 }
 
 // Test if search returns no vertex for a single-node tree given coords are not exact
@@ -108,7 +108,7 @@ TEST_F(VertexTreeTest, TestSingleNodeTreeSearchIncorrectCoords)
 // Test if search returns the proper vertex for a multi-node tree given vertex coords
 TEST_F(VertexTreeTest, TestMultipleNodeTreeSearchCorrectCoords)
 {
-    ASSERT_EQ(multipleNodeTree.search(c3)->getId(), v3->getId());
+    ASSERT_EQ(multipleNodeTree.search(c3).get(), v3.get());
 }
 
 // Test if search returns no vertex for a multi-node tree given coords are not exact
@@ -127,7 +127,7 @@ TEST_F(VertexTreeTest, TestNeighbourEmptyTree)
 // Test if proximitySearch returns the proper vertex for a single-node tree given coords are exact and dist is 0
 TEST_F(VertexTreeTest, TestSingleNodeTreeNeighbourZeroDist)
 {
-    ASSERT_EQ(singleNodeTree.proximitySearch(c1, 0)->getId(), v1->getId());
+    ASSERT_EQ(singleNodeTree.proximitySearch(c1, 0).get(), v1.get());
 }
 
 // Test if proximitySearch returns no vertex for a single-node tree given coords are not exact and dist is 0
@@ -140,7 +140,7 @@ TEST_F(VertexTreeTest, TestSingleNodeTreeNoNeighbourZeroDist)
 TEST_F(VertexTreeTest, TestSingleNodeTreeNeighbourInRange)
 {
     const int coords[2] = {8, 9};
-    ASSERT_EQ(singleNodeTree.proximitySearch(coords, 5)->getId(), v1->getId());
+    ASSERT_EQ(singleNodeTree.proximitySearch(coords, 5).get(), v1.get());
 }
 
 // Test if proximitySearch returns no vertex for a single-node tree given vertex is not within range of dist
@@ -153,7 +153,7 @@ TEST_F(VertexTreeTest, TestSingleNodeTreeNoNeighbourInRange)
 // Test if proximitySearch returns the proper vertex for a multi-node tree given coords are exact and dist is 0
 TEST_F(VertexTreeTest, TestMultipleNodeTreeNeighbourZeroDist)
 {
-    ASSERT_EQ(multipleNodeTree.proximitySearch(c3, 0)->getId(), v3->getId());
+    ASSERT_EQ(multipleNodeTree.proximitySearch(c3, 0).get(), v3.get());
 }
 
 // Test if proximitySearch returns no vertex for a multi-node tree given coords are not exact and dist is 0
@@ -167,7 +167,7 @@ TEST_F(VertexTreeTest, TestMultipleNodeTreeNoNeighbourZeroDist)
 TEST_F(VertexTreeTest, TestMultipleNodeTreeNeighbourInRange)
 {
     const int coords[2] = {8, 8};
-    ASSERT_EQ(multipleNodeTree.proximitySearch(coords, 2)->getId(), v3->getId());
+    ASSERT_EQ(multipleNodeTree.proximitySearch(coords, 2).get(), v3.get());
 }
 
 // Test if proximitySearch returns no vertex for a multi-node tree given vertex is not within range of dist
