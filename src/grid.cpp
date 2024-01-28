@@ -58,8 +58,8 @@ void Grid::drawGridItems()
  */
 void Grid::selectMode()
 {
-    int onLeftClickCursorX;
-    int onLeftClickCursorY;
+    int onLeftClickCursorPos[2];
+    int onRightClickCursorPos[2];
     int onRightClickCursorX;
     int onRightClickCursorY;
 
@@ -67,30 +67,32 @@ void Grid::selectMode()
     // If true, unselect the selected object
     if (Cursor::rightButtonDown())
     {
-        Cursor::getScaledOnRightClickPos(onRightClickCursorX, onRightClickCursorY);
+        Cursor::getScaledOnRightClickPos(onRightClickCursorPos[0], onRightClickCursorPos[1]);
 
-        if (inGrid(onRightClickCursorX, onRightClickCursorY))
+        if (inGrid(onRightClickCursorPos[0], onRightClickCursorPos[1]))
         {
             selectedObj = nullptr;
             return;
         }
     }
 
-    Cursor::getScaledOnLeftClickPos(onLeftClickCursorX, onLeftClickCursorY);
+    Cursor::getScaledOnLeftClickPos(onLeftClickCursorPos[0], onLeftClickCursorPos[1]);
 
     // If clicked position is not in the grid, return
-    if (!inGrid(onLeftClickCursorX, onLeftClickCursorY))
+    if (!inGrid(onLeftClickCursorPos[0], onLeftClickCursorPos[1]))
     {
         return;
     }
 
-    // Check if left mouse button is in down position and in the grid
+    // Check if left mouse button is in down position
     if (Cursor::leftButtonDown())
     {
         if (wallModeLeftButtonClicked)
         {
             return;
         }
+
+        std::shared_ptr<Vertex> onClickVertex = mapData->vertexTree.proximitySearch(onLeftClickCursorPos, VERTEX_SNAP_DIST);
 
         updateSelectedObj();
 
@@ -428,7 +430,7 @@ void Grid::updateSelectedObj()
     Cursor::getScaledOnLeftClickPos(leftClickCoords[0], leftClickCoords[1]);
     windowCoordToGridCoord(leftClickCoords[0], leftClickCoords[1]);
 
-    std::shared_ptr<Vertex> selectedVertex = mapData->vertexTree.proximitySearch(leftClickCoords, GRID_VERTEX_RADIUS);
+    std::shared_ptr<Vertex> selectedVertex = mapData->vertexTree.proximitySearch(leftClickCoords, VERTEX_SNAP_DIST);
 
     if (selectedVertex)
     {
@@ -436,6 +438,10 @@ void Grid::updateSelectedObj()
 
         selectedVertexOriginalCoords[0] = selectedVertex->getX();
         selectedVertexOriginalCoords[1] = selectedVertex->getY();
+    }
+    else
+    {
+        selectedObj = nullptr;
     }
 }
 
@@ -457,6 +463,11 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
 
     if (neighbourVertex)
     {
+        if (neighbourVertex->getId() == vertex->getId())
+        {
+            return false;
+        }
+
         vertex_id neighbourId = neighbourVertex->getId();
 
         std::vector<wall_id> modifiedWalls;
