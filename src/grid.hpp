@@ -6,9 +6,7 @@
 #include "modemenu.hpp"
 #include "vertex.hpp"
 #include "wall.hpp"
-#include "vertextree.hpp"
-#include "vertexgraph.hpp"
-#include "walltree.hpp"
+#include "mapdata.hpp"
 
 #define DEFAULT_GRID_WIDTH 200
 #define DEFAULT_GRID_HEIGHT 200
@@ -24,7 +22,7 @@ class Grid
 public:
     Grid() = default;
     ~Grid() = default;
-    void init(int xpos, int ypos, int width, int height, const Renderer *const gridRenderer);
+    void init(int xpos, int ypos, int width, int height, MapData *map, const Renderer *const gridRenderer);
     void drawGrid() const;
     void drawGridItems();
     void selectMode();
@@ -40,9 +38,7 @@ private:
     int gridTop;
     int gridBottom;
     const Renderer *renderer;
-    VertexTree vertexTree;
-    WallTree wallTree;
-    VertexGraph graph;
+    MapData *mapData;
     std::shared_ptr<Wall> newWall;
     std::shared_ptr<GridObject> selectedObj;
 
@@ -50,6 +46,8 @@ private:
     bool selectModeLeftButtonClicked = false;
     bool selectedVertexRemoved = false;
     bool wallModeLeftButtonClicked = false;
+    void drawWalls();
+    void drawVertices();
     void makeNewWall();
     bool selectedVertexMoved(Vertex *selectedVertex);
     bool inGrid(int x, int y) const;

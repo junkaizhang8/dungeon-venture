@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <memory>
 #include "window.hpp"
 #include "keyevent.hpp"
 #include "editorkeyevent.hpp"
@@ -8,7 +9,7 @@
 #include "grid.hpp"
 #include "modemenu.hpp"
 #include "attributesmenu.hpp"
-#include "vertextree.hpp"
+#include "mapdata.hpp"
 
 #define DEFAULT_EDITOR_WIDTH DEFAULT_GRID_WIDTH + DEFAULT_MODE_MENU_WIDTH
 #define DEFAULT_EDITOR_HEIGHT DEFAULT_GRID_HEIGHT
@@ -30,4 +31,5 @@ public:
 private:
     EditorKeyEvent keys; // Store key press statuses of certain events
     Grid grid;
+    std::unique_ptr<MapData> mapData;
 };

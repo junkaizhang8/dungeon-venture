@@ -54,7 +54,10 @@ int Editor::init(int width, int height, int pixelScale, const char *const title)
     Cursor::setMouseButtonCallback(window);
     Cursor::setPixelScale(pixelScale);
 
-    grid.init(DEFAULT_GRID_LEFT, DEFAULT_GRID_RIGHT, DEFAULT_GRID_TOP, DEFAULT_GRID_BOTTOM, renderer.get());
+    mapData = std::make_unique<MapData>();
+
+    grid.init(DEFAULT_GRID_LEFT, DEFAULT_GRID_RIGHT, DEFAULT_GRID_TOP, DEFAULT_GRID_BOTTOM,
+              mapData.get(), renderer.get());
 
     return INIT_SUCCESS;
 }

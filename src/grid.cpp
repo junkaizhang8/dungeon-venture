@@ -4,21 +4,20 @@
 #include "cursor.hpp"
 #include "vertex.hpp"
 #include "wall.hpp"
-#include "vertextree.hpp"
-#include "vertexgraph.hpp"
-#include "walltree.hpp"
+#include "mapdata.hpp"
 #include "grid.hpp"
 
 /*
  * Initialize the grid specified by its boundary positions in the window and
  * the renderer assigned to the window.
  */
-void Grid::init(int left, int right, int top, int bottom, const Renderer *const gridRenderer)
+void Grid::init(int left, int right, int top, int bottom, MapData *data, const Renderer *const gridRenderer)
 {
     gridLeft = left;
     gridRight = right;
     gridTop = top;
     gridBottom = bottom;
+    mapData = data;
     renderer = gridRenderer;
     newWall = std::make_shared<Wall>();
 }
@@ -44,8 +43,8 @@ void Grid::drawGrid() const
 // Draw all grid items.
 void Grid::drawGridItems()
 {
-    wallTree.drawWalls(renderer, gridLeft, gridRight, gridTop, gridBottom);
-    vertexTree.drawVertices(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    drawWalls();
+    drawVertices();
 
     if (selectedObj)
     {
@@ -118,7 +117,7 @@ void Grid::selectMode()
             }
             else
             {
-                vertexTree.insert(selectedObjVertexCasted);
+                mapData->vertexTree.insert(selectedObjVertexCasted);
             }
 
             selectedVertexRemoved = false;
@@ -148,7 +147,7 @@ void Grid::cancelSelectMode()
             }
             else
             {
-                vertexTree.insert(selectedObjVertexCasted);
+                mapData->vertexTree.insert(selectedObjVertexCasted);
             }
 
             selectedVertexRemoved = false;
@@ -214,7 +213,7 @@ void Grid::wallMode()
 
         // If there is a neighbouring vertex to the end vertex,
         // assign it to end vertex of newWall
-        if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
+        if ((neighbourVertex = mapData->vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
         {
             newWall->setEndVertex(neighbourVertex);
         }
@@ -228,13 +227,13 @@ void Grid::wallMode()
         // If startCoords and endCoords are not equal and there does not already exist
         // a wall between the start vertex and end vertex, save the newWall data.
         // Else, reset newWall.
-        if (!sameCoords(startCoords, endCoords) && !graph.contains(newWall->getStartVertex()->getId(),
+        if (!sameCoords(startCoords, endCoords) && !mapData->graph.contains(newWall->getStartVertex()->getId(),
                                                                    newWall->getEndVertex()->getId()))
         {
-            vertexTree.insert(newWall->getStartVertex());
-            vertexTree.insert(newWall->getEndVertex());
-            wallTree.insert(newWall);
-            graph.insertMapping(*newWall);
+            mapData->vertexTree.insert(newWall->getStartVertex());
+            mapData->vertexTree.insert(newWall->getEndVertex());
+            mapData->wallTree.insert(newWall);
+            mapData->graph.insertMapping(*newWall);
         }
 
         newWall.reset(new Wall());
@@ -269,6 +268,22 @@ void Grid::gridCoordToWindowCoord(int &x, int &y) const
     y += gridBottom / 2;
 }
 
+void Grid::drawWalls()
+{
+    for (auto it = mapData->wallTree.begin(); it != mapData->wallTree.end(); ++it)
+    {
+        (*it)->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    }
+}
+
+void Grid::drawVertices()
+{
+    for (auto it = mapData->vertexTree.begin(); it != mapData->vertexTree.end(); ++it)
+    {
+        (*it)->drawObj(renderer, gridLeft, gridRight, gridTop, gridBottom);
+    }
+}
+
 // Make a new wall determined by the cursor action.
 void Grid::makeNewWall()
 {
@@ -288,7 +303,7 @@ void Grid::makeNewWall()
     // or assign a neighbouring vertex to it
     if (newWall->getStartVertex() == nullptr)
     {
-        if ((neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
+        if ((neighbourVertex = mapData->vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST)))
         {
             newWall->setStartVertex(neighbourVertex);
         }
@@ -399,10 +414,10 @@ void Grid::updateSelectedObj()
         Vertex *selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj).get();
 
         // If selected vertex has been moved, remove selected vertex from
-        // vertexTree to avoid invalid tree traversal behaviour
+        // mapData->vertexTree to avoid invalid tree traversal behaviour
         if (selectedVertexMoved(selectedObjVertexCasted) && !selectedVertexRemoved)
         {
-            vertexTree.remove(selectedObjVertexCasted->getId(), selectedVertexOriginalCoords);
+            mapData->vertexTree.remove(selectedObjVertexCasted->getId(), selectedVertexOriginalCoords);
             selectedVertexRemoved = true;
         }
 
@@ -413,7 +428,7 @@ void Grid::updateSelectedObj()
     Cursor::getScaledOnLeftClickPos(leftClickCoords[0], leftClickCoords[1]);
     windowCoordToGridCoord(leftClickCoords[0], leftClickCoords[1]);
 
-    std::shared_ptr<Vertex> selectedVertex = vertexTree.proximitySearch(leftClickCoords, GRID_VERTEX_RADIUS);
+    std::shared_ptr<Vertex> selectedVertex = mapData->vertexTree.proximitySearch(leftClickCoords, GRID_VERTEX_RADIUS);
 
     if (selectedVertex)
     {
@@ -438,7 +453,7 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
 
     vertex_id vertexId = vertex->getId();
 
-    std::shared_ptr<Vertex> neighbourVertex = vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST);
+    std::shared_ptr<Vertex> neighbourVertex = mapData->vertexTree.proximitySearch(coords, VERTEX_SNAP_DIST);
 
     if (neighbourVertex)
     {
@@ -447,14 +462,14 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
         std::vector<wall_id> modifiedWalls;
         std::vector<wall_id> removedWalls;
 
-        graph.modifyMapping(vertexId, neighbourId, modifiedWalls, removedWalls);
+        mapData->graph.modifyMapping(vertexId, neighbourId, modifiedWalls, removedWalls);
 
         // Modify every wall in modifiedWalls by replacing
         // the wall vertex pointing to vertex to be the
         // neighbouring vertex
         for (auto wallId : modifiedWalls)
         {
-            std::shared_ptr<Wall> wall = wallTree.search(wallId);
+            std::shared_ptr<Wall> wall = mapData->wallTree.search(wallId);
 
             if (wall)
             {
@@ -472,11 +487,11 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
         // Remove the walls in removedWalls
         for (auto wallId : removedWalls)
         {
-            wallTree.remove(wallId);
+            mapData->wallTree.remove(wallId);
         }
 
-        // Remove the snapped vertex from vertexTree
-        vertexTree.remove(vertexId, coords);
+        // Remove the snapped vertex from mapData->vertexTree
+        mapData->vertexTree.remove(vertexId, coords);
 
         vertex = neighbourVertex;
 
@@ -501,7 +516,7 @@ void Grid::updateSelectedObjOnSnap(std::shared_ptr<Vertex> &selectedObjVertexCas
 
     selectedObj = selectedObjVertexCasted;
 
-    if (graph.contains(selectedObjVertexCasted->getId()))
+    if (mapData->graph.contains(selectedObjVertexCasted->getId()))
     {
         selectedObj = selectedObjVertexCasted;
     }
@@ -510,7 +525,7 @@ void Grid::updateSelectedObjOnSnap(std::shared_ptr<Vertex> &selectedObjVertexCas
         int coords[2];
         selectedObjVertexCasted->getCoords(coords);
 
-        vertexTree.remove(selectedObjVertexCasted->getId(), coords);
+        mapData->vertexTree.remove(selectedObjVertexCasted->getId(), coords);
 
         selectedObj = nullptr;
     }

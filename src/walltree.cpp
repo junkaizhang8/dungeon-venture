@@ -1,6 +1,31 @@
 #include <memory>
 #include "walltree.hpp"
 
+// Return an iterator pointing to the first (in-order) element in the tree.
+WallTreeIterator WallTree::begin()
+{
+    if (root == nullptr)
+    {
+        return end();
+    }
+
+    WallNode *temp = root.get();
+
+    while (temp->left != nullptr)
+    {
+        temp = temp->left.get();
+    }
+
+    return WallTreeIterator(temp, this);
+}
+
+// Return an iterator pointing to the element immediately after the last
+// element in the tree.
+WallTreeIterator WallTree::end()
+{
+    return WallTreeIterator(nullptr, this);
+}
+
 // Insert newWall into the tree.
 void WallTree::insert(const std::shared_ptr<Wall> &newWall)
 {
@@ -15,11 +40,6 @@ void WallTree::remove(wall_id id)
 std::shared_ptr<Wall> WallTree::search(wall_id id) const
 {
     return search(root, id);
-}
-
-void WallTree::drawWalls(const Renderer *const renderer, int gridLeft, int gridRight, int gridTop, int gridBottom) const
-{
-    drawWalls(root, renderer, gridLeft, gridRight, gridTop, gridBottom);
 }
 
 void WallTree::insert(std::unique_ptr<WallNode> &node, const std::shared_ptr<Wall> &newWall)
@@ -120,4 +140,97 @@ std::shared_ptr<Wall> WallTree::findMin(const std::unique_ptr<WallNode> &node) c
     }
 
     return findMin(node->right);
+}
+
+// Pre-increment operator
+WallTreeIterator &WallTreeIterator::operator++()
+{
+    const WallTree::WallNode *temp;
+
+    // Set node to be the smallest element if node is empty
+    if (node == nullptr)
+    {
+        node = tree->root.get();
+
+        while (node->left != nullptr)
+        {
+            node = node->left.get();
+        }
+    } else
+    {
+        // If there is a right subtree, set node to be the smallest node in subtree
+        if (node->right != nullptr)
+        {
+            node = node->right.get();
+
+            while (node->left != nullptr)
+            {
+                node = node->left.get();
+            }
+        }
+        // If there is no right subtree, then either:
+        // 1. set node to be its parent node if node is a left child of parent
+        // 2. set node to be the parent node of the root of the right subtree
+        else
+        {
+            temp = node->parent;
+            
+            while (temp != nullptr && temp->right && node == temp->right.get())
+            {
+                node = temp;
+                temp = temp->parent;
+            }
+
+            node = temp;
+        }
+    }
+
+    return *this;
+}
+
+// Post-increment operator
+WallTreeIterator WallTreeIterator::operator++(int)
+{
+    WallTreeIterator it = *this;
+    const WallTree::WallNode *temp;
+
+    // Set node to be the smallest element if node is empty
+    if (node == nullptr)
+    {
+        node = tree->root.get();
+
+        while (node->left != nullptr)
+        {
+            node = node->left.get();
+        }
+    } else
+    {
+        // If there is a right subtree, set node to be the smallest node in subtree
+        if (node->right != nullptr)
+        {
+            node = node->right.get();
+
+            while (node->left != nullptr)
+            {
+                node = node->left.get();
+            }
+        }
+        // If there is no right subtree, then either:
+        // 1. set node to be its parent node if node is a left child of parent
+        // 2. set node to be the parent node of the root of the right subtree
+        else
+        {
+            temp = node->parent;
+            
+            while (temp != nullptr && temp->right && node == temp->right.get())
+            {
+                node = temp;
+                temp = temp->parent;
+            }
+
+            node = temp;
+        }
+    }
+
+    return it;
 }
