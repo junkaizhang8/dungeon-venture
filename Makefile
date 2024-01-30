@@ -23,14 +23,16 @@ TEST_CPP_FILES = $(wildcard $(TEST_SRC_DIR)/*.cpp)
 TEST_OBJ_FILES = $(wildcard $(TEST_BUILD_DIR)/*.o)
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(CPP_FILES))
 TEST_OBJS = $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_BUILD_DIR)/%.o, $(TEST_CPP_FILES))
-UNIT_TESTS = $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_OUTPUT_DIR)/%, $(TEST_CPP_FILES))
+UNIT_TESTS = $(patsubst $(TEST_SRC_DIR)/%.test.cpp, $(TEST_OUTPUT_DIR)/%.test, $(TEST_CPP_FILES))
 
 all: $(GAME_EDITOR) $(TEST_ALL) $(UNIT_TESTS)
+.PHONY : all
 
 $(GAME_EDITOR) : $(OBJS)
 	$(COMPILER) $(COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(LINKER_FLAGS) $^ -o $@
 
 $(TEST_ALL_COMMAND) : $(TEST_ALL)
+.PHONY : $(TEST_ALL_COMMAND)
 
 $(TEST_ALL) : $(TEST_OBJS) $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
@@ -42,10 +44,11 @@ $(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp | $(TEST_BUILD_DIR)
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) -c $< -o $@
 
 # Individually compile test file into TEST_OUTPUT_DIR through their prefix name (e.g. for file x.test.cpp, we type `make x.test`)
-% : $(TEST_BUILD_DIR)/%.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+%.test : $(TEST_BUILD_DIR)/%.test.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS)) | $(TEST_OUTPUT_DIR)/%.test
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $(TEST_OUTPUT_DIR)/$@
+.PHONY : %.test
 
-$(TEST_OUTPUT_DIR)/% : $(TEST_BUILD_DIR)/%.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+$(TEST_OUTPUT_DIR)/%.test : $(TEST_BUILD_DIR)/%.test.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
 
 $(BUILD_DIR) :
@@ -55,15 +58,15 @@ $(TEST_BUILD_DIR) :
 	mkdir $(TEST_BUILD_DIR)
 
 clean : clean_editor clean_test
-.PHONY: clean
+.PHONY : clean
 
 clean_editor :
 	rm -f $(GAME_EDITOR) $(OBJ_FILES) .depend
-.PHONY: clean
+.PHONY : clean_editor
 
 clean_test :
 	rm -f $(TEST_ALL) $(TEST_OBJ_FILES) $(TEST_FILES)
-.PHONY: clean_test
+.PHONY : clean_test
 
 .depend : $(SRC_DIR) $(CPP_FILES)
 	$(COMPILER) -MM $(INCLUDE_PATHS) $(filter-out $<, $^) | sed '/\.o/ s/^/${BUILD_DIR}\//' > .depend
