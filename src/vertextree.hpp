@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 #include "vertex.hpp"
 #include "renderer.hpp"
 
@@ -11,17 +12,21 @@
 // Forward declaration to avoid compiler error
 
 class VertexTreeIterator;
+class VertexTreePreOrderIterator;
 
 // K-d tree implementation for storing vertices, sorted by their Cartesian coordinates
 class VertexTree
 {
 friend class VertexTreeIterator;
+friend class VertexTreePreOrderIterator;
 
 public:
     VertexTree() = default;
     ~VertexTree() = default;
     VertexTreeIterator begin();
     VertexTreeIterator end();
+    VertexTreePreOrderIterator preOrderBegin();
+    VertexTreePreOrderIterator preOrderEnd();
     void insert(const std::shared_ptr<Vertex> &newVertex);
     void remove(int id, const int coords[2]);
     std::shared_ptr<Vertex> search(const int coords[2]) const;
@@ -68,8 +73,29 @@ public:
     
 private:
     const VertexTree::VertexNode *node;
-    const VertexTree *tree;
 
-    VertexTreeIterator(const VertexTree::VertexNode *n, const VertexTree *t)
+    VertexTreeIterator(const VertexTree::VertexNode *n)
+        : node(n) {}
+};
+
+class VertexTreePreOrderIterator
+{
+friend class VertexTree;
+
+public:
+    VertexTreePreOrderIterator() = default;
+    ~VertexTreePreOrderIterator() = default;
+    const Vertex *operator*() const { return (node) ? node->vertex.get() : nullptr; }
+    bool operator==(const VertexTreePreOrderIterator &rhs) const { return **this == *rhs; }
+    bool operator!=(const VertexTreePreOrderIterator &rhs) const { return **this != *rhs; }
+    VertexTreePreOrderIterator &operator++();
+    VertexTreePreOrderIterator operator++(int);
+    
+private:
+    const VertexTree::VertexNode *node;
+    const VertexTree *tree;
+    std::stack<VertexTree::VertexNode *> nodeStack;
+
+    VertexTreePreOrderIterator(const VertexTree::VertexNode *n, const VertexTree *t)
         : node(n), tree(t) {}
 };

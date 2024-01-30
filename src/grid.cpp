@@ -110,14 +110,17 @@ void Grid::selectMode()
         std::shared_ptr<Vertex> selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj);
         if (selectedObjVertexCasted)
         {
-            // If vertex was snapped to neighbouring vertex
-            if (snapToNeighbourVertex(selectedObjVertexCasted))
+            if (selectedVertexRemoved)
             {
-                updateSelectedObjOnSnap(selectedObjVertexCasted);
-            }
-            else
-            {
-                mapData->vertexTree.insert(selectedObjVertexCasted);
+                // If vertex was snapped to neighbouring vertex
+                if (snapToNeighbourVertex(selectedObjVertexCasted))
+                {
+                    updateSelectedObjOnSnap(selectedObjVertexCasted);
+                }
+                else
+                {
+                    mapData->vertexTree.insert(selectedObjVertexCasted);
+                }
             }
 
             selectedVertexRemoved = false;
@@ -141,15 +144,18 @@ void Grid::cancelSelectMode()
 
         if (selectedObjVertexCasted)
         {
-            if (snapToNeighbourVertex(selectedObjVertexCasted))
+            if (selectedVertexRemoved)
             {
-                updateSelectedObjOnSnap(selectedObjVertexCasted);
+                if (snapToNeighbourVertex(selectedObjVertexCasted))
+                {
+                    updateSelectedObjOnSnap(selectedObjVertexCasted);
+                }
+                else
+                {
+                    mapData->vertexTree.insert(selectedObjVertexCasted);
+                }
             }
-            else
-            {
-                mapData->vertexTree.insert(selectedObjVertexCasted);
-            }
-
+            
             selectedVertexRemoved = false;
         }
     }

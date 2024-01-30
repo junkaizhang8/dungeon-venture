@@ -1,23 +1,28 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 #include "wall.hpp"
 #include "renderer.hpp"
 
 // Forward declaration to avoid compiler error
 
 class WallTreeIterator;
+class WallTreePreOrderIterator;
 
 // BST for storing walls sorted by their ids.
 class WallTree
 {
 friend class WallTreeIterator;
+friend class WallTreePreOrderIterator;
 
 public:
     WallTree() = default;
     ~WallTree() = default;
     WallTreeIterator begin();
     WallTreeIterator end();
+    WallTreePreOrderIterator preOrderBegin();
+    WallTreePreOrderIterator preOrderEnd();
     void insert(const std::shared_ptr<Wall> &newWall);
     void remove(wall_id id);
     std::shared_ptr<Wall> search(wall_id id) const;
@@ -65,8 +70,29 @@ public:
     
 private:
     const WallTree::WallNode *node;
-    const WallTree *tree;
 
-    WallTreeIterator(const WallTree::WallNode *n, const WallTree *t)
+    WallTreeIterator(const WallTree::WallNode *n)
+        : node(n) {}
+};
+
+class WallTreePreOrderIterator
+{
+friend class WallTree;
+
+public:
+    WallTreePreOrderIterator() = default;
+    ~WallTreePreOrderIterator() = default;
+    const Wall *operator*() const { return (node) ? node->wall.get() : nullptr; }
+    bool operator==(const WallTreePreOrderIterator &rhs) const { return **this == *rhs; }
+    bool operator!=(const WallTreePreOrderIterator &rhs) const { return **this != *rhs; }
+    WallTreePreOrderIterator &operator++();
+    WallTreePreOrderIterator operator++(int);
+    
+private:
+    const WallTree::WallNode *node;
+    const WallTree *tree;
+    std::stack<WallTree::WallNode *> nodeStack;
+
+    WallTreePreOrderIterator(const WallTree::WallNode *n, const WallTree *t)
         : node(n), tree(t) {}
 };

@@ -18,14 +18,27 @@ VertexTreeIterator VertexTree::begin()
         temp = temp->left.get();
     }
 
-    return VertexTreeIterator(temp, this);
+    return VertexTreeIterator(temp);
 }
 
 // Return an iterator pointing to the element immediately after the last
 // element in the tree.
 VertexTreeIterator VertexTree::end()
 {
-    return VertexTreeIterator(nullptr, this);
+    return VertexTreeIterator(nullptr);
+}
+
+// Return an iterator pointing to the first (pre-order) element in the tree.
+VertexTreePreOrderIterator VertexTree::preOrderBegin()
+{
+    return VertexTreePreOrderIterator(root.get(), this);
+}
+
+// Return an iterator pointing to the element immediately after the last
+// element in the tree.
+VertexTreePreOrderIterator VertexTree::preOrderEnd()
+{
+    return VertexTreePreOrderIterator(nullptr, this);
 }
 
 void VertexTree::insert(const std::shared_ptr<Vertex> &newVertex)
@@ -351,43 +364,35 @@ VertexTreeIterator &VertexTreeIterator::operator++()
 {
     const VertexTree::VertexNode *temp;
 
-    // Set node to be the smallest element if node is empty
     if (node == nullptr)
     {
-        node = tree->root.get();
+        return *this;
+    }
+
+    // If there is a right subtree, set node to be the smallest node in subtree
+    if (node->right != nullptr)
+    {
+        node = node->right.get();
 
         while (node->left != nullptr)
         {
             node = node->left.get();
         }
     }
+    // If there is no right subtree, then either:
+    // 1. set node to be its parent node if node is a left child of parent
+    // 2. set node to be the parent node of the root of the right subtree
     else
     {
-        // If there is a right subtree, set node to be the smallest node in subtree
-        if (node->right != nullptr)
+        temp = node->parent;
+
+        while (temp != nullptr && temp->right && node == temp->right.get())
         {
-            node = node->right.get();
-
-            while (node->left != nullptr)
-            {
-                node = node->left.get();
-            }
-        }
-        // If there is no right subtree, then either:
-        // 1. set node to be its parent node if node is a left child of parent
-        // 2. set node to be the parent node of the root of the right subtree
-        else
-        {
-            temp = node->parent;
-
-            while (temp != nullptr && temp->right && node == temp->right.get())
-            {
-                node = temp;
-                temp = temp->parent;
-            }
-
             node = temp;
+            temp = temp->parent;
         }
+
+        node = temp;
     }
 
     return *this;
@@ -396,45 +401,123 @@ VertexTreeIterator &VertexTreeIterator::operator++()
 // Post-increment operator
 VertexTreeIterator VertexTreeIterator::operator++(int)
 {
-    VertexTreeIterator it = *this;
+    VertexTreeIterator &it = *this;
     const VertexTree::VertexNode *temp;
 
-    // Set node to be the smallest element if node is empty
     if (node == nullptr)
     {
-        node = tree->root.get();
+        return *this;
+    }
+
+    // If there is a right subtree, set node to be the smallest node in subtree
+    if (node->right != nullptr)
+    {
+        node = node->right.get();
 
         while (node->left != nullptr)
         {
             node = node->left.get();
         }
     }
+    // If there is no right subtree, then either:
+    // 1. set node to be its parent node if node is a left child of parent
+    // 2. set node to be the parent node of the root of the right subtree
     else
     {
-        // If there is a right subtree, set node to be the smallest node in subtree
-        if (node->right != nullptr)
+        temp = node->parent;
+
+        while (temp != nullptr && temp->right && node == temp->right.get())
         {
-            node = node->right.get();
-
-            while (node->left != nullptr)
-            {
-                node = node->left.get();
-            }
-        }
-        // If there is no right subtree, then either:
-        // 1. set node to be its parent node if node is a left child of parent
-        // 2. set node to be the parent node of the root of the right subtree
-        else
-        {
-            temp = node->parent;
-
-            while (temp != nullptr && temp->right && node == temp->right.get())
-            {
-                node = temp;
-                temp = temp->parent;
-            }
-
             node = temp;
+            temp = temp->parent;
+        }
+
+        node = temp;
+    }
+
+    return it;
+}
+
+// Pre-increment operator
+VertexTreePreOrderIterator &VertexTreePreOrderIterator::operator++()
+{
+    if (node == nullptr)
+    {
+        return *this;
+    }
+
+    if (node == tree->root.get())
+    {
+        nodeStack.push(nullptr);
+
+        if (tree->root->right)
+        {
+            nodeStack.push(tree->root->right.get());
+        }
+        
+        if (tree->root->left)
+        {
+            nodeStack.push(tree->root->left.get());
+        }
+    }
+
+    node = nodeStack.top();
+    nodeStack.pop();
+
+    if (node)
+    {
+        if (node->right)
+        {
+            nodeStack.push(node->right.get());
+        }
+
+        if (node->left)
+        {
+            nodeStack.push(node->left.get());
+        }
+    }
+
+    return *this;
+}
+
+// Post-increment operator
+VertexTreePreOrderIterator VertexTreePreOrderIterator::operator++(int)
+{
+    VertexTreePreOrderIterator &it = *this;
+
+    if (node == nullptr)
+    {
+        return *this;
+    }
+
+    if (node == tree->root.get())
+    {
+        nodeStack.push(nullptr);
+
+        if (tree->root->right)
+        {
+            nodeStack.push(tree->root->right.get());
+        }
+        
+        if (tree->root->left)
+        {
+            nodeStack.push(tree->root->left.get());
+        }
+    }
+
+    node = nodeStack.top();
+    nodeStack.pop();
+
+    if (node)
+    {
+        if (node->right)
+        {
+            nodeStack.push(node->right.get());
+        }
+
+        if (node->left)
+        {
+            nodeStack.push(node->left.get());
         }
     }
 
