@@ -5,6 +5,7 @@
 #include "renderer.hpp"
 
 // Forward declaration to avoid compiler error
+
 class WallTreeIterator;
 
 // BST for storing walls sorted by their ids.
@@ -30,15 +31,23 @@ private:
         std::unique_ptr<WallNode> left;
         std::unique_ptr<WallNode> right;
         WallNode *parent = nullptr;
+        int height = 1;
     };
     
     std::unique_ptr<WallNode> root;
-    void insert(std::unique_ptr<WallNode> &node, const std::shared_ptr<Wall> &newWall);
-    std::unique_ptr<WallNode> remove(std::unique_ptr<WallNode> &node, wall_id id);
+    void insert(std::unique_ptr<WallNode> &node, WallNode *const prevNode, const std::shared_ptr<Wall> &newWall);
+    std::unique_ptr<WallNode> remove(std::unique_ptr<WallNode> &node, WallNode *const prevNode, wall_id id);
     std::shared_ptr<Wall> search(const std::unique_ptr<WallNode> &node, wall_id id) const;
-    void drawWalls(const std::unique_ptr<WallNode> &node, const Renderer *const renderer,\
-                   int gridLeft, int gridRight, int gridTop, int gridBottom) const;
     std::shared_ptr<Wall> findMin(const std::unique_ptr<WallNode> &node) const;
+    void rotateLeft(std::unique_ptr<WallNode> &pivot);
+    void rotateRight(std::unique_ptr<WallNode> &pivot);
+    void rebalance(std::unique_ptr<WallNode> &node);
+    int getHeight(const std::unique_ptr<WallNode> &node) const { return (node) ? node->height : 0; }
+    int getBalance(const std::unique_ptr<WallNode> &node) const { return (node) ?
+                                                            getHeight(node->left) - getHeight(node->right) :
+                                                            0; }
+    int max(int a, int b) { return (a >= b) ? a : b; }
+
 };
 
 class WallTreeIterator
@@ -49,8 +58,8 @@ public:
     WallTreeIterator() = default;
     ~WallTreeIterator() = default;
     const Wall *operator*() const { return (node) ? node->wall.get() : nullptr; }
-    bool operator==(const WallTreeIterator &rhs) { return **this == *rhs; }
-    bool operator!=(const WallTreeIterator &rhs) { return **this != *rhs; }
+    bool operator==(const WallTreeIterator &rhs) const { return **this == *rhs; }
+    bool operator!=(const WallTreeIterator &rhs) const { return **this != *rhs; }
     WallTreeIterator &operator++();
     WallTreeIterator operator++(int);
     

@@ -60,8 +60,6 @@ void Grid::selectMode()
 {
     int onLeftClickCursorPos[2];
     int onRightClickCursorPos[2];
-    int onRightClickCursorX;
-    int onRightClickCursorY;
 
     // Check for if right mouse button is in down position and in the grid
     // If true, unselect the selected object

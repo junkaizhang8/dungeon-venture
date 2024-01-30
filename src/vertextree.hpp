@@ -9,6 +9,7 @@
 #define NO_VERTEX_ID -1
 
 // Forward declaration to avoid compiler error
+
 class VertexTreeIterator;
 
 // K-d tree implementation for storing vertices, sorted by their Cartesian coordinates
@@ -46,11 +47,10 @@ private:
                                    unsigned depth) const;
     std::shared_ptr<Vertex> proximitySearch(const std::unique_ptr<VertexNode> &node, const int coords[2],
                                             double distSquared, unsigned depth) const;
-    void drawVertices(const std::unique_ptr<VertexNode> &node, const Renderer *const renderer,
-                      int gridLeft, int gridRight, int gridTop, int gridBottom) const;
     std::shared_ptr<Vertex> findMin(const std::unique_ptr<VertexNode> &node, int dimension, unsigned depth);
     std::shared_ptr<Vertex> determineMin(const std::shared_ptr<Vertex> &v1, const std::shared_ptr<Vertex> &v2,
                                          const std::shared_ptr<Vertex> &v3, int dimension);
+    bool goLeft(const std::unique_ptr<VertexNode> &node, const int coords[2], unsigned depth);
 };
 
 class VertexTreeIterator
@@ -61,8 +61,8 @@ public:
     VertexTreeIterator() = default;
     ~VertexTreeIterator() = default;
     const Vertex *operator*() const { return (node) ? node->vertex.get() : nullptr; }
-    bool operator==(const VertexTreeIterator &rhs) { return **this == *rhs; }
-    bool operator!=(const VertexTreeIterator &rhs) { return **this != *rhs; }
+    bool operator==(const VertexTreeIterator &rhs) const { return **this == *rhs; }
+    bool operator!=(const VertexTreeIterator &rhs) const { return **this != *rhs; }
     VertexTreeIterator &operator++();
     VertexTreeIterator operator++(int);
     
