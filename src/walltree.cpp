@@ -160,17 +160,14 @@ std::shared_ptr<Wall> WallTree::findMin(const std::unique_ptr<WallNode> &node) c
         return nullptr;
     }
 
-    if (node->left == nullptr && node->right == nullptr)
+    WallNode *temp = node.get();
+
+    while (temp->left)
     {
-        return node->wall;
+        temp = temp->left.get();
     }
 
-    if (node->left)
-    {
-        return findMin(node->left);
-    }
-
-    return findMin(node->right);
+    return temp->wall;
 }
 
 void WallTree::rotateLeft(std::unique_ptr<WallNode> &pivot)
@@ -438,3 +435,26 @@ WallTreePreOrderIterator WallTreePreOrderIterator::operator++(int)
 
     return it;
 }
+
+
+// Debugging methods
+// void WallTree::draw()
+// {
+//     draw(root);
+// }
+
+// void WallTree::draw(const std::unique_ptr<WallNode> &node)
+// {
+//     if (node == nullptr)
+//     {
+//         return;
+//     }
+
+//     std::cout << node->wall->getId() << ": ";
+//     (node->left) ? std::cout << node->left->wall->getId() << " " : std::cout << "   ";
+//     if (node->right) std::cout << node->right->wall->getId();
+//     std::cout << std::endl;
+
+//     draw(node->left);
+//     draw(node->right);
+// }

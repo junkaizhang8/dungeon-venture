@@ -27,6 +27,9 @@ public:
     void remove(wall_id id);
     std::shared_ptr<Wall> search(wall_id id) const;
 
+    // Debugging method
+    // void draw();
+
 private:
     struct WallNode
     {
@@ -52,6 +55,9 @@ private:
                                                             getHeight(node->left) - getHeight(node->right) :
                                                             0; }
     int max(int a, int b) { return (a >= b) ? a : b; }
+
+    // Debugging method
+    // void draw(const std::unique_ptr<WallNode> &node);
 
 };
 

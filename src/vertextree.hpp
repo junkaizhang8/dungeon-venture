@@ -32,6 +32,9 @@ public:
     std::shared_ptr<Vertex> search(const int coords[2]) const;
     std::shared_ptr<Vertex> proximitySearch(const int coords[2], double dist) const;
 
+    // Debugging method
+    // void draw();
+
 private:
     struct VertexNode
     {
@@ -56,6 +59,9 @@ private:
     std::shared_ptr<Vertex> determineMin(const std::shared_ptr<Vertex> &v1, const std::shared_ptr<Vertex> &v2,
                                          const std::shared_ptr<Vertex> &v3, int dimension);
     bool goLeft(const std::unique_ptr<VertexNode> &node, const int coords[2], unsigned depth);
+
+    // Debugging method
+    // void draw(const std::unique_ptr<VertexNode> &node);
 };
 
 class VertexTreeIterator

@@ -523,3 +523,26 @@ VertexTreePreOrderIterator VertexTreePreOrderIterator::operator++(int)
 
     return it;
 }
+
+
+// Debugging methods
+// void VertexTree::draw()
+// {
+//     draw(root);
+// }
+
+// void VertexTree::draw(const std::unique_ptr<VertexNode> &node)
+// {
+//     if (node == nullptr)
+//     {
+//         return;
+//     }
+
+//     std::cout << node->vertex->getId() << ": ";
+//     (node->left) ? std::cout << node->left->vertex->getId() << " " : std::cout << "   ";
+//     if (node->right) std::cout << node->right->vertex->getId();
+//     std::cout << std::endl;
+
+//     draw(node->left);
+//     draw(node->right);
+// }
