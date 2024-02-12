@@ -528,7 +528,16 @@ VertexTreePreOrderIterator VertexTreePreOrderIterator::operator++(int)
 // Debugging methods
 // void VertexTree::draw()
 // {
+//     if (root == nullptr)
+//     {
+//         return;
+//     }
+
+//     std::cout << "=======================" << std::endl;
+//     std::cout << "root: " << root->vertex->getId() << std::endl;
 //     draw(root);
+//     std::cout << "=======================" << std::endl;
+
 // }
 
 // void VertexTree::draw(const std::unique_ptr<VertexNode> &node)
@@ -538,9 +547,50 @@ VertexTreePreOrderIterator VertexTreePreOrderIterator::operator++(int)
 //         return;
 //     }
 
-//     std::cout << node->vertex->getId() << ": ";
-//     (node->left) ? std::cout << node->left->vertex->getId() << " " : std::cout << "   ";
-//     if (node->right) std::cout << node->right->vertex->getId();
+//     int rootMaxBuf = 5;
+//     int leftMaxBuf = 5;
+
+//     std::cout << node->vertex->getId() << ":";
+//     if (node->vertex->getId() != 0)
+//     {
+//         rootMaxBuf -= (floor(log10(node->vertex->getId())) + 1);
+//     }
+//     else
+//     {
+//         --rootMaxBuf;
+//     }
+
+//     for (int i = 0; i < rootMaxBuf; ++i)
+//     {
+//         std::cout << " ";
+//     }
+
+//     std::cout << "  ";
+
+//     if (node->left)
+//     {
+//         std::cout << node->left->vertex->getId();
+//         if (node->left->vertex->getId() != 0)
+//         {
+//             leftMaxBuf -= (floor(log10(node->left->vertex->getId())) + 1);
+//         }
+//         else
+//         {
+//             --leftMaxBuf;
+//         }
+//     }
+
+//     for (int i = 0; i < leftMaxBuf; ++i)
+//     {
+//         std::cout << " ";
+//     }
+//     std::cout << "  ";
+
+//     if (node->right)
+//     {
+//         std::cout << node->right->vertex->getId();
+//     }
+    
 //     std::cout << std::endl;
 
 //     draw(node->left);

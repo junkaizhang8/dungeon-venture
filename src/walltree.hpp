@@ -58,7 +58,6 @@ private:
 
     // Debugging method
     // void draw(const std::unique_ptr<WallNode> &node);
-
 };
 
 class WallTreeIterator

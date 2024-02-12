@@ -440,7 +440,15 @@ WallTreePreOrderIterator WallTreePreOrderIterator::operator++(int)
 // Debugging methods
 // void WallTree::draw()
 // {
+//     if (root == nullptr)
+//     {
+//         return;
+//     }
+
+//     std::cout << "=======================" << std::endl;
+//     std::cout << "root: " << root->wall->getId() << std::endl;
 //     draw(root);
+//     std::cout << "=======================" << std::endl;
 // }
 
 // void WallTree::draw(const std::unique_ptr<WallNode> &node)
@@ -450,9 +458,50 @@ WallTreePreOrderIterator WallTreePreOrderIterator::operator++(int)
 //         return;
 //     }
 
-//     std::cout << node->wall->getId() << ": ";
-//     (node->left) ? std::cout << node->left->wall->getId() << " " : std::cout << "   ";
-//     if (node->right) std::cout << node->right->wall->getId();
+//     int rootMaxBuf = 5;
+//     int leftMaxBuf = 5;
+
+//     std::cout << node->wall->getId() << ":";
+//     if (node->wall->getId() != 0)
+//     {
+//         rootMaxBuf -= (floor(log10(node->wall->getId())) + 1);
+//     }
+//     else
+//     {
+//         --rootMaxBuf;
+//     }
+
+//     for (int i = 0; i < rootMaxBuf; ++i)
+//     {
+//         std::cout << " ";
+//     }
+
+//     std::cout << "  ";
+
+//     if (node->left)
+//     {
+//         std::cout << node->left->wall->getId();
+//         if (node->left->wall->getId() != 0)
+//         {
+//             leftMaxBuf -= (floor(log10(node->left->wall->getId())) + 1);
+//         }
+//         else
+//         {
+//             --leftMaxBuf;
+//         }
+//     }
+
+//     for (int i = 0; i < leftMaxBuf; ++i)
+//     {
+//         std::cout << " ";
+//     }
+//     std::cout << "  ";
+
+//     if (node->right)
+//     {
+//         std::cout << node->right->wall->getId();
+//     }
+    
 //     std::cout << std::endl;
 
 //     draw(node->left);
