@@ -41,15 +41,12 @@ private:
     MapData *mapData;
     std::shared_ptr<Wall> newWall;
     std::shared_ptr<GridObject> selectedObj;
-    int selectedVertexOriginalCoords[2];
     bool selectModeLeftButtonClicked = false;
-    bool selectedVertexRemoved = false;
     bool wallModeLeftButtonClicked = false;
 
     void drawWalls();
     void drawVertices();
     void makeNewWall();
-    bool selectedVertexMoved(Vertex *selectedVertex);
     bool inGrid(int x, int y) const;
     void forceCoordsInGrid(int &x, int &y) const;
     bool sameCoords(const int coord1[2], const int coord2[2]) const;

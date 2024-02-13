@@ -177,6 +177,8 @@ void WallTree::rotateLeft(std::unique_ptr<WallNode> &pivot)
         return;
     }
 
+    WallNode *parent = pivot->parent;
+
     std::unique_ptr<WallNode> temp = std::move(pivot->right);
     temp->parent = pivot->parent;
 
@@ -186,7 +188,7 @@ void WallTree::rotateLeft(std::unique_ptr<WallNode> &pivot)
     temp->height = max(getHeight(temp->left), getHeight(temp->right)) + 1;
     pivot = std::move(temp);
 
-    pivot->parent = nullptr;
+    pivot->parent = parent;
 
     if (pivot->left)
     {
@@ -206,6 +208,8 @@ void WallTree::rotateRight(std::unique_ptr<WallNode> &pivot)
         return;
     }
 
+    WallNode *parent = pivot->parent;
+
     std::unique_ptr<WallNode> temp = std::move(pivot->left);
 
     pivot->left = std::move(temp->right);
@@ -214,9 +218,8 @@ void WallTree::rotateRight(std::unique_ptr<WallNode> &pivot)
     temp->height = max(getHeight(temp->left), getHeight(temp->right)) + 1;
     pivot = std::move(temp);
 
-    pivot->parent = nullptr;
+    pivot->parent = parent;
 
-    
     if (pivot->right)
     {
         pivot->right->parent = pivot.get();

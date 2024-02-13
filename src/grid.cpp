@@ -90,8 +90,6 @@ void Grid::selectMode()
             return;
         }
 
-        std::shared_ptr<Vertex> onClickVertex = mapData->vertexTree.proximitySearch(onLeftClickCursorPos, VERTEX_SNAP_DIST);
-
         updateSelectedObj();
 
         selectModeLeftButtonClicked = true;
@@ -110,20 +108,15 @@ void Grid::selectMode()
         std::shared_ptr<Vertex> selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj);
         if (selectedObjVertexCasted)
         {
-            if (selectedVertexRemoved)
+            // If vertex was snapped to neighbouring vertex
+            if (snapToNeighbourVertex(selectedObjVertexCasted))
             {
-                // If vertex was snapped to neighbouring vertex
-                if (snapToNeighbourVertex(selectedObjVertexCasted))
-                {
-                    updateSelectedObjOnSnap(selectedObjVertexCasted);
-                }
-                else
-                {
-                    mapData->vertexTree.insert(selectedObjVertexCasted);
-                }
+                updateSelectedObjOnSnap(selectedObjVertexCasted);
             }
-
-            selectedVertexRemoved = false;
+            else
+            {
+                mapData->vertexTree.insert(selectedObjVertexCasted);
+            }
         }
     }
 }
@@ -144,19 +137,15 @@ void Grid::cancelSelectMode()
 
         if (selectedObjVertexCasted)
         {
-            if (selectedVertexRemoved)
+            // If vertex was snapped to neighbouring vertex
+            if (snapToNeighbourVertex(selectedObjVertexCasted))
             {
-                if (snapToNeighbourVertex(selectedObjVertexCasted))
-                {
-                    updateSelectedObjOnSnap(selectedObjVertexCasted);
-                }
-                else
-                {
-                    mapData->vertexTree.insert(selectedObjVertexCasted);
-                }
+                updateSelectedObjOnSnap(selectedObjVertexCasted);
             }
-            
-            selectedVertexRemoved = false;
+            else
+            {
+                mapData->vertexTree.insert(selectedObjVertexCasted);
+            }
         }
     }
 
@@ -338,42 +327,6 @@ void Grid::makeNewWall()
                                      gridTop, gridBottom);
 }
 
-// Return true if selectedVertex has been moved.
-// Return false otherwise.
-bool Grid::selectedVertexMoved(Vertex *const selectedVertex)
-{
-    if (selectedVertex == nullptr)
-    {
-        return false;
-    }
-
-    int selectedObjCoords[2];
-    int cursorCoords[2];
-
-    selectedVertex->getCoords(selectedObjCoords);
-
-    Cursor::getScaledCursorPos(cursorCoords[0], cursorCoords[1]);
-    forceCoordsInGrid(cursorCoords[0], cursorCoords[1]);
-    windowCoordToGridCoord(cursorCoords[0], cursorCoords[1]);
-
-    selectedVertex->setX(cursorCoords[0]);
-    selectedVertex->setY(cursorCoords[1]);
-
-    // If cursor position is different from original position of
-    // selectedVertex, update the original position of
-    // selectedVertex and return true
-    if (cursorCoords[0] != selectedVertexOriginalCoords[0] ||
-        cursorCoords[1] != selectedVertexOriginalCoords[1])
-    {
-        selectedVertexOriginalCoords[0] = cursorCoords[0];
-        selectedVertexOriginalCoords[1] = cursorCoords[1];
-
-        return true;
-    }
-
-    return false;
-}
-
 // Return if (x, y) is in the grid.
 // Return false otherwise.
 bool Grid::inGrid(int x, int y) const
@@ -419,15 +372,16 @@ void Grid::updateSelectedObj()
     {
         Vertex *selectedObjVertexCasted = std::dynamic_pointer_cast<Vertex>(selectedObj).get();
 
-        // If selected vertex has been moved, remove selected vertex from
-        // mapData->vertexTree to avoid invalid tree traversal behaviour
-        if (selectedVertexMoved(selectedObjVertexCasted) && !selectedVertexRemoved)
+        if (selectedObjVertexCasted)
         {
-            mapData->vertexTree.remove(selectedObjVertexCasted->getId(), selectedVertexOriginalCoords);
-            selectedVertexRemoved = true;
-        }
+            int cursorPos[2];
+            Cursor::getScaledCursorPos(cursorPos[0], cursorPos[1]);
+            windowCoordToGridCoord(cursorPos[0], cursorPos[1]);
 
-        return;
+            selectedObjVertexCasted->setX(cursorPos[0]);
+            selectedObjVertexCasted->setY(cursorPos[1]);
+            return;
+        }
     }
 
     int leftClickCoords[2];
@@ -440,8 +394,10 @@ void Grid::updateSelectedObj()
     {
         selectedObj = selectedVertex;
 
-        selectedVertexOriginalCoords[0] = selectedVertex->getX();
-        selectedVertexOriginalCoords[1] = selectedVertex->getY();
+        int coords[2];
+        selectedVertex->getCoords(coords);
+
+        mapData->vertexTree.remove(selectedVertex->getId(), coords);
     }
     else
     {
@@ -467,11 +423,6 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
 
     if (neighbourVertex)
     {
-        if (neighbourVertex->getId() == vertex->getId())
-        {
-            return false;
-        }
-
         vertex_id neighbourId = neighbourVertex->getId();
 
         std::vector<wall_id> modifiedWalls;
@@ -505,7 +456,7 @@ bool Grid::snapToNeighbourVertex(std::shared_ptr<Vertex> &vertex)
             mapData->wallTree.remove(wallId);
         }
 
-        // Remove the snapped vertex from mapData->vertexTree
+        // Remove the snapped vertex from vertexTree
         mapData->vertexTree.remove(vertexId, coords);
 
         vertex = neighbourVertex;
