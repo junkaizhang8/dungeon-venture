@@ -54,12 +54,10 @@ int Game::init(int width, int height, int pixelScale, const char *title)
     return INIT_SUCCESS;
 }
 
-void Game::run()
+void Game::update()
 {
-    display();
+    clock.updateClock();
 }
-
-void Game::update() {}
 
 void Game::display()
 {
@@ -72,16 +70,4 @@ void Game::display()
         glfwSwapBuffers(window);
     }
     glfwPollEvents();
-    clock.updateClock();
-}
-
-bool Game::isRunning()
-{
-    return !glfwWindowShouldClose(window);
-}
-
-void Game::close()
-{
-    glfwDestroyWindow(window);
-    glfwTerminate();
 }

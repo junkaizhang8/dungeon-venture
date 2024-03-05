@@ -62,12 +62,6 @@ int Editor::init(int width, int height, int pixelScale, const char *const title)
     return INIT_SUCCESS;
 }
 
-void Editor::run()
-{
-    update();
-    display();
-}
-
 void Editor::update()
 {
     clock.updateClock();
@@ -104,15 +98,4 @@ void Editor::display()
     }
 
     glfwPollEvents();
-}
-
-bool Editor::isRunning()
-{
-    return !glfwWindowShouldClose(window);
-}
-
-void Editor::close()
-{
-    glfwDestroyWindow(window);
-    glfwTerminate();
 }

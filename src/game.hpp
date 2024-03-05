@@ -18,11 +18,8 @@ public:
     Game() = default;
     ~Game() override;
     int init(int width, int height, int pixelScale, const char *const title) override;
-    void run();
-    void update();
+    void update() override;
     void display() override;
-    bool isRunning() override;
-    void close() override;
 
 private:
     GameKeyEvent keys; // Store key press statuses of movement keys
