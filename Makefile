@@ -48,14 +48,17 @@ $(TEST_BUILD_DIR)/%.o : $(TEST_SRC_DIR)/%.cpp | $(TEST_BUILD_DIR)
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $(TEST_OUTPUT_DIR)/$@
 .PHONY : %.test
 
-$(TEST_OUTPUT_DIR)/%.test : $(TEST_BUILD_DIR)/%.test.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+$(TEST_OUTPUT_DIR)/%.test : $(TEST_BUILD_DIR)/%.test.o $(filter-out $(BUILD_DIR)/main.o, $(OBJS)) | $(TEST_OUTPUT_DIR)
 	$(COMPILER) $(TEST_COMPILER_FLAGS) $(INCLUDE_PATHS) $(FRAMEWORKS) $(LIBRARY_PATHS) $(TEST_LINKER_FLAG) $^ -o $@
 
 $(BUILD_DIR) :
-	mkdir $(BUILD_DIR)
+	[ -d $(BUILD_DIR) ] || mkdir $(BUILD_DIR)
 
 $(TEST_BUILD_DIR) :
-	mkdir $(TEST_BUILD_DIR)
+	[ -d $(TEST_BUILD_DIR) ] || mkdir $(TEST_BUILD_DIR)
+
+$(TEST_OUTPUT_DIR) :
+	[ -d $(TEST_OUTPUT_DIR) ] || mkdir $(TEST_OUTPUT_DIR)
 
 clean : clean_editor clean_test
 .PHONY : clean
