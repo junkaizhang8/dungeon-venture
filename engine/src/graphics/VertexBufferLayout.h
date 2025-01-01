@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "utils/debug.h"
+#include "utils/EngineDebug.h"
 
 /**
  * @brief A struct representing a vertex buffer element.
@@ -39,7 +39,7 @@ struct VertexBufferElement
             case GL_UNSIGNED_BYTE:
                 return 1;
         }
-        ASSERT(false);
+        LOG_ERROR("Invalid type");
         return 0;
     }
 };
@@ -120,7 +120,7 @@ public:
     }
 
     /**
-     * @brief Returns the elements in the layout.
+     * @brief Gets the elements in the layout.
      *
      * @return A vector containing the elements in the layout.
      */
@@ -130,7 +130,7 @@ public:
     }
 
     /**
-     * @brief Returns the stride of the layout.
+     * @brief Gets the stride of the layout.
      *
      * @return The stride of the layout.
      */

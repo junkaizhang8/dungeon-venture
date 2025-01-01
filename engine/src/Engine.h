@@ -2,6 +2,8 @@
 
 // Main header file for the engine. This file includes all the necessary headers
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
@@ -10,10 +12,23 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
-#include "core/IndexBuffer.h"
-#include "core/Renderer.h"
-#include "core/Shader.h"
-#include "core/Texture.h"
-#include "core/VertexArray.h"
-#include "core/VertexBuffer.h"
+#include "camera/Camera.h"
+#include "camera/Camera2D.h"
+#include "core/Application.h"
+#include "core/Input.h"
+#include "core/Layer.h"
+#include "core/Window.h"
+#include "events/ApplicationEvent.h"
+#include "events/Event.h"
+#include "events/KeyEvent.h"
+#include "events/MouseEvent.h"
+#include "graphics/IndexBuffer.h"
+#include "graphics/Renderer.h"
+#include "graphics/Shader.h"
+#include "graphics/Texture.h"
+#include "graphics/VertexArray.h"
+#include "graphics/VertexBuffer.h"
+#include "utils/EngineDebug.h"
