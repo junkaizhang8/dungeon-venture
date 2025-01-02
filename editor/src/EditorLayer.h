@@ -2,6 +2,8 @@
 
 #include <Engine.h>
 
+#include "Grid.h"
+
 using namespace Engine;
 
 class EditorLayer : public Layer
@@ -19,11 +21,7 @@ public:
 
 private:
     Camera2D camera;
-    std::unique_ptr<VertexBuffer> vb;
-    std::unique_ptr<VertexBufferLayout> layout;
-    std::unique_ptr<VertexArray> va;
-    std::unique_ptr<IndexBuffer> ib;
-    std::unique_ptr<Shader> shader;
-    std::unique_ptr<Renderer> renderer;
-    std::unique_ptr<Texture> texture;
+    Shader shader;
+    Grid grid;
+    std::unique_ptr<Mesh> mesh;
 };
