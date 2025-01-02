@@ -28,10 +28,11 @@ namespace Engine
          * position, aspect ratio, and rotation enabled flag.
          *
          * @param position The position of the camera.
-         * @param aspectRatio The aspect ratio of the camera.
+         * @param width The width of the window.
+         * @param height The height of the window.
          * @param rotationEnabled Whether or not rotation is enabled.
          */
-        Camera(glm::vec3 position, float aspectRatio,
+        Camera(glm::vec3 position, float width, float height,
                bool rotationEnabled = false);
 
         /**
@@ -125,10 +126,12 @@ namespace Engine
         glm::vec3 position;
 
         // Camera speed
-        float movementSpeed;
+        float movementSpeed = 400.0f;
 
-        // The aspect ratio of the window
-        float aspectRatio;
+        // The width of the window
+        float width;
+        // The height of the window
+        float height;
 
         // Whether or not rotation is enabled
         bool rotationEnabled;

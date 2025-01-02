@@ -27,17 +27,17 @@ namespace Engine
     }
 
     // Convert a shader type to an OpenGL enum
-    static unsigned int castShaderType(Shader::Type type)
+    static unsigned int castShaderType(ShaderType type)
     {
         switch (type)
         {
-            case Shader::Type::VERTEX:
+            case ShaderType::VERTEX:
                 return GL_VERTEX_SHADER;
-            case Shader::Type::FRAGMENT:
+            case ShaderType::FRAGMENT:
                 return GL_FRAGMENT_SHADER;
-            case Shader::Type::GEOMETRY:
+            case ShaderType::GEOMETRY:
                 return GL_GEOMETRY_SHADER;
-            case Shader::Type::COMPUTE:
+            case ShaderType::COMPUTE:
                 return GL_COMPUTE_SHADER;
         }
         LOG_ERROR("Invalid shader type");
@@ -50,7 +50,7 @@ namespace Engine
 
     void Shader::unbind() const { glUseProgram(0); }
 
-    void Shader::addShader(Type type, const std::string& path)
+    void Shader::addShader(ShaderType type, const std::string& path)
     {
         unsigned int shader = 0;
         // Extract the shader source from the file

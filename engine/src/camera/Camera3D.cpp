@@ -5,8 +5,9 @@
 namespace Engine
 {
     Camera3D::Camera3D(glm::vec3 position, glm::vec3 worldUp, float near,
-                       float far, float aspectRatio, bool rotationEnabled)
-        : Camera(position, aspectRatio, rotationEnabled),
+                       float far, float width, float height,
+                       bool rotationEnabled)
+        : Camera(position, width, height, rotationEnabled),
           worldUp(worldUp),
           near(near),
           far(far)
@@ -59,7 +60,7 @@ namespace Engine
     void Camera3D::updateProjectionMatrix()
     {
         projectionMatrix =
-            glm::perspective(glm::radians(FOV), aspectRatio, near, far);
+            glm::perspective(glm::radians(FOV), width / height, near, far);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 

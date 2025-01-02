@@ -1,6 +1,7 @@
 #include "Application.h"
 
-#include <iostream>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include "events/KeyEvent.h"
 #include "events/MouseEvent.h"
@@ -60,6 +61,7 @@ namespace Engine
 
     void Application::eventLoop()
     {
+        glClear(GL_COLOR_BUFFER_BIT);
         float currentTime = (float)glfwGetTime();
         float deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;

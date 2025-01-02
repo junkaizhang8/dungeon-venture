@@ -7,6 +7,19 @@
 namespace Engine
 {
     /**
+     * @brief An enum class that represents the type of shader.
+     *
+     * This enum class represents the type of shader that is being created.
+     */
+    enum class ShaderType
+    {
+        VERTEX,
+        FRAGMENT,
+        GEOMETRY,
+        COMPUTE
+    };
+
+    /**
      * @brief A class that encapsulates an OpenGL shader object.
      *
      * This class provides a simple interface for creating and managing shader
@@ -15,14 +28,6 @@ namespace Engine
     class Shader
     {
     public:
-        enum class Type
-        {
-            VERTEX,
-            FRAGMENT,
-            GEOMETRY,
-            COMPUTE
-        };
-
         /**
          * @brief Creates a new Shader object.
          *
@@ -64,7 +69,7 @@ namespace Engine
          * @param type The type of the shader to add.
          * @param path The path to the file containing the shader source.
          */
-        void addShader(Type type, const std::string& path);
+        void addShader(ShaderType type, const std::string& path);
 
         /**
          * @brief Compiles the Shader program.
@@ -107,7 +112,7 @@ namespace Engine
         // The OpenGL ID of the shader program.
         unsigned int id;
         // An unordered map of shader types to shader IDs.
-        mutable std::unordered_map<Type, unsigned int> shaders;
+        mutable std::unordered_map<ShaderType, unsigned int> shaders;
         // An unordered map of uniform names to uniform locations.
         mutable std::unordered_map<std::string, int> uniformLocations;
 

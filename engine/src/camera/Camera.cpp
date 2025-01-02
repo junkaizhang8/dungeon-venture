@@ -2,11 +2,12 @@
 
 namespace Engine
 {
-    Camera::Camera(glm::vec3 position, float aspectRatio, bool rotationEnabled)
+    Camera::Camera(glm::vec3 position, float width, float height,
+                   bool rotationEnabled)
         : position(position),
-          aspectRatio(aspectRatio),
-          rotationEnabled(rotationEnabled),
-          movementSpeed(1.0f)
+          width(width),
+          height(height),
+          rotationEnabled(rotationEnabled)
     {
     }
 

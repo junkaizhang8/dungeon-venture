@@ -32,11 +32,12 @@ namespace Engine
          * @param worldUp The world up vector.
          * @param near The near plane.
          * @param far The far plane.
-         * @param aspectRatio The aspect ratio of the camera.
+         * @param width The width of the window.
+         * @param height The height of the window.
          * @param rotationEnabled Whether or not rotation is enabled.
          */
         Camera3D(glm::vec3 position, glm::vec3 worldUp, float near, float far,
-                 float aspectRatio, bool rotationEnabled = false);
+                 float width, float height, bool rotationEnabled = false);
 
         /**
          * @brief Updates the camera.

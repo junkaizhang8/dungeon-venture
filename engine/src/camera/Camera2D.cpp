@@ -5,18 +5,13 @@
 
 namespace Engine
 {
-    Camera2D::Camera2D(glm::vec3 position, float zoom, float aspectRatio,
-                       bool rotationEnabled)
-        : Camera(position, aspectRatio, rotationEnabled),
-          zoom(zoom),
-          zoomRate(0.1f),
-          dragSensitivity(0.005f)
+    Camera2D::Camera2D(glm::vec3 position, float zoom, float width,
+                       float height, bool rotationEnabled)
+        : Camera(position, width, height, rotationEnabled), zoom(zoom)
     {
         std::pair<float, float> cursorPos = Input::getMousePosition();
         prevCursorX = cursorPos.first;
         prevCursorY = cursorPos.second;
-
-        updateMovementSpeed();
 
         updateProjectionMatrix();
         updateViewMatrix();
@@ -31,60 +26,61 @@ namespace Engine
 
     void Camera2D::onUpdate(float deltaTime)
     {
+        float adjustedSpeed = movementSpeed * zoom * deltaTime;
+
         // Camera movement must be updated here instead of onEvent
         // since there is a delay between initial key press and key repeat
         if (Input::isKeyPressed(GLFW_KEY_W))
         {
-            position.y += movementSpeed * deltaTime;
+            position.y += adjustedSpeed;
             updateViewMatrix();
         }
         if (Input::isKeyPressed(GLFW_KEY_S))
         {
-            position.y -= movementSpeed * deltaTime;
+            position.y -= adjustedSpeed;
             updateViewMatrix();
         }
         if (Input::isKeyPressed(GLFW_KEY_A))
         {
-            position.x -= movementSpeed * deltaTime;
+            position.x -= adjustedSpeed;
             updateViewMatrix();
         }
         if (Input::isKeyPressed(GLFW_KEY_D))
         {
-            position.x += movementSpeed * deltaTime;
+            position.x += adjustedSpeed;
             updateViewMatrix();
         }
     }
 
     void Camera2D::updateViewMatrix()
     {
-        glm::mat4 transform =
-            glm::lookAt(position, position + glm::vec3(0.0f, 0.0f, -1.0f),
-                        glm::vec3(0.0f, 1.0f, 0.0f));
-        viewMatrix = glm::inverse(transform);
+        viewMatrix = glm::translate(glm::mat4(1.0f), -position);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
     void Camera2D::updateProjectionMatrix()
     {
-        projectionMatrix = glm::ortho(-aspectRatio * zoom, aspectRatio * zoom,
-                                      -zoom, zoom, -1.0f, 1.0f);
+        float halfWidth = width / 2;
+        float halfHeight = height / 2;
+
+        projectionMatrix =
+            glm::ortho(-halfWidth * zoom, halfWidth * zoom, -halfHeight * zoom,
+                       halfHeight * zoom, -1.0f, 1.0f);
         viewProjectionMatrix = projectionMatrix * viewMatrix;
     }
 
-    void Camera2D::updateMovementSpeed() { movementSpeed = zoom; }
-
     void Camera2D::onWindowResize(WindowResizeEvent& event)
     {
-        aspectRatio = static_cast<float>(event.getWidth()) / event.getHeight();
+        width = event.getWidth();
+        height = event.getHeight();
         updateProjectionMatrix();
     }
 
     void Camera2D::onMouseScroll(MouseScrolledEvent& event)
     {
         zoom -= event.getYOffset() * zoomRate;
-        if (zoom < 0.1f) zoom = 0.1f;
-        if (zoom > 10.0f) zoom = 10.0f;
-        updateMovementSpeed();
+        if (zoom < minZoom) zoom = minZoom;
+        if (zoom > maxZoom) zoom = maxZoom;
         updateProjectionMatrix();
     }
 
@@ -95,8 +91,8 @@ namespace Engine
             float xOffset = event.getX() - prevCursorX;
             float yOffset = event.getY() - prevCursorY;
 
-            position.x += xOffset * dragSensitivity * zoom;
-            position.y -= yOffset * dragSensitivity * zoom;
+            position.x -= xOffset * dragSensitivity * zoom;
+            position.y += yOffset * dragSensitivity * zoom;
 
             updateViewMatrix();
         }

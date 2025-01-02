@@ -10,6 +10,7 @@
 #include "events/Event.h"
 #include "events/KeyEvent.h"
 #include "events/MouseEvent.h"
+#include "utils/EngineDebug.h"
 
 namespace Engine
 {
@@ -29,10 +30,11 @@ namespace Engine
          *
          * @param position The position of the camera.
          * @param zoom The zoom level of the camera.
-         * @param aspectRatio The aspect ratio of the camera.
+         * @param width The width of the window.
+         * @param height The height of the window.
          * @param rotationEnabled Whether or not rotation is enabled.
          */
-        Camera2D(glm::vec3 position, float zoom, float aspectRatio,
+        Camera2D(glm::vec3 position, float zoom, float width, float height,
                  bool rotationEnabled = false);
 
         /**
@@ -45,13 +47,64 @@ namespace Engine
         void onUpdate(float deltaTime) override;
 
         /**
+         * @brief Gets the zoom level of the camera.
+         *
+         * @return The zoom level of the camera.
+         */
+        inline float getZoom() const { return zoom; }
+
+        /**
          * @brief Sets the zoom rate of the camera.
          *
          * This method sets the zoom rate of the camera.
          *
          * @param rate The zoom rate of the camera.
          */
-        inline float setZoomRate(float rate) { return zoomRate = rate; }
+        inline void setZoomRate(float rate) { zoomRate = rate; }
+
+        /**
+         * @brief Gets the minimum zoom level of the camera.
+         *
+         * @return The minimum zoom level of the camera.
+         */
+        inline float getMinZoom() const { return minZoom; }
+
+        /**
+         * @brief Sets the minimum zoom level of the camera.
+         *
+         * This method sets the minimum zoom level of the camera.
+         *
+         * @param min The minimum zoom level of the camera.
+         */
+        inline void setMinZoom(float min)
+        {
+            ENGINE_ASSERT(min > 0, "Minimum zoom must be greater than 0");
+            ENGINE_ASSERT(min < maxZoom,
+                          "Minimum zoom must be less than max zoom");
+            minZoom = min;
+        }
+
+        /**
+         * @brief Gets the maximum zoom level of the camera.
+         *
+         * @return The maximum zoom level of the camera.
+         */
+        inline float getMaxZoom() const { return maxZoom; }
+
+        /**
+         * @brief Sets the maximum zoom level of the camera.
+         *
+         * This method sets the maximum zoom level of the camera.
+         *
+         * @param max The maximum zoom level of the camera.
+         */
+        inline void setMaxZoom(float max)
+        {
+            ENGINE_ASSERT(max > 0, "Maximum zoom must be greater than 0");
+            ENGINE_ASSERT(max > minZoom,
+                          "Maximum zoom must be greater than min zoom");
+            maxZoom = max;
+        }
 
         /**
          * @brief Sets the drag sensitivity of the camera.
@@ -82,12 +135,16 @@ namespace Engine
 
     private:
         // The zoom level of the camera
-        float zoom;
+        float zoom = 1.0f;
         // The zoom rate of the camera
-        float zoomRate;
+        float zoomRate = 0.1f;
+        // The minimum level of zoom
+        float minZoom = 0.1f;
+        // The maximum level of zoom
+        float maxZoom = 10.0f;
 
         // Drag sensitivity of the camera
-        float dragSensitivity;
+        float dragSensitivity = 1.0f;
 
         // Previous cursor x position
         float prevCursorX;
