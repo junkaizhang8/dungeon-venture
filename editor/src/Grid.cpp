@@ -19,19 +19,19 @@ void Grid::draw(const Camera2D& camera) const
     float gridSpacing;
 
     if (zoom < 0.25f)
-        gridSpacing = 25.0f;
+        gridSpacing = 10.0f;
     else if (zoom < 0.5f)
-        gridSpacing = 50.0f;
+        gridSpacing = 20.0f;
     else if (zoom < 2.0f)
-        gridSpacing = 100.0f;
+        gridSpacing = 40.0f;
     else if (zoom < 4.0f)
-        gridSpacing = 200.0f;
+        gridSpacing = 80.0f;
     else if (zoom < 8.0f)
-        gridSpacing = 400.0f;
+        gridSpacing = 160.0f;
     else
-        gridSpacing = 800.0f;
+        gridSpacing = 320.0f;
 
-    float majorGridSpacing = gridSpacing * 5;
+    float majorGridSpacing = gridSpacing * 4;
 
     // Calculate the left, right, bottom, and top of the grid
     // Add gridSpacing to the bounds to ensure the grid spans the entire screen
@@ -57,7 +57,7 @@ void Grid::draw(const Camera2D& camera) const
     float minorLineWeight = 0.5f * zoom;
 
     glm::vec4 axisColor = {0.8f, 0.8f, 0.8f, 1.0f};
-    glm::vec4 majorColor = {0.6f, 0.6f, 0.6f, 1.0f};
+    glm::vec4 majorColor = {0.7f, 0.7f, 0.7f, 1.0f};
     glm::vec4 minorColor = {0.5f, 0.5f, 0.5f, 1.0f};
 
     // Draw vertical lines
