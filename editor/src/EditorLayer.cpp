@@ -15,15 +15,14 @@ void EditorLayer::onAttach()
         {{-200.0f, -200.0f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
         {{200.0f, -200.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
         {{200.0f, 200.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}};
+
     std::vector<unsigned int> indices = {0, 1, 2};
 
-    mesh =
-        std::make_unique<Mesh>("quad", vertices, indices, MeshType::TRIANGLES);
+    mesh = std::make_unique<Mesh>("quad", vertices, indices);
 
     shader.addShader(ShaderType::VERTEX, "res/shaders/default.vert");
     shader.addShader(ShaderType::FRAGMENT, "res/shaders/default.frag");
     shader.compileShader();
-
     shader.unbind();
 }
 
@@ -34,7 +33,7 @@ void EditorLayer::onUpdate(float deltaTime)
     camera.onUpdate(deltaTime);
     grid.draw(camera);
     shader.bind();
-    shader.setUniformMat4f("u_MVP", camera.getViewProjectionMatrix());
+    shader.setUniformMat4f("u_VP", camera.getViewProjectionMatrix());
     mesh->draw(shader);
     shader.unbind();
 }

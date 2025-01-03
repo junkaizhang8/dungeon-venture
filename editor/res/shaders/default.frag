@@ -1,10 +1,10 @@
-#version 330 core
+#version 410 core
 
-in vec4 vColor;
+in vec4 v_Color;
 
 out vec4 FragColor;
 
 void main()
 {
-    FragColor = vColor;
+    FragColor = v_Color;
 }

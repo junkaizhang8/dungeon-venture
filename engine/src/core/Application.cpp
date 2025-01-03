@@ -45,7 +45,7 @@ namespace Engine
     {
         dispatcher.dispatch(event);
 
-        for (auto layer : layerStack) layer->onEvent(event);
+        for (auto& layer : layerStack) layer->onEvent(event);
     }
 
     void Application::pushLayer(Layer* layer) { layerStack.pushLayer(layer); }
@@ -66,7 +66,7 @@ namespace Engine
         float deltaTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
 
-        for (auto layer : layerStack) layer->onUpdate(deltaTime);
+        for (auto& layer : layerStack) layer->onUpdate(deltaTime);
 
         window->onUpdate();
     }

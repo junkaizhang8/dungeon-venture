@@ -34,11 +34,12 @@ namespace Engine
             int success = glfwInit();
             ENGINE_ASSERT(success);
 
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
             glfwSetErrorCallback(glfwErrorCallback);
+
             glfwInitialized = true;
         }
 
@@ -148,6 +149,9 @@ namespace Engine
                     }
                 }
             });
+
+        // Enable point size
+        glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     Window::~Window() { destroy(); }

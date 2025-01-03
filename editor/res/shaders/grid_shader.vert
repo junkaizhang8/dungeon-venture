@@ -1,7 +1,15 @@
-#version 330 core
+#version 410 core
 
-layout(location = 0) in vec4 aPosition;
+layout(location = 0) in vec4 a_Position;
+layout(location = 1) in vec4 a_Color;
+layout(location = 3) in float a_LineWeight;
 
-uniform mat4 u_MVP;
+out vec4 v_Color;
+out float v_LineWeight;
 
-void main() { gl_Position = u_MVP * aPosition; }
+void main()
+{
+    v_Color = a_Color;
+    v_LineWeight = a_LineWeight;
+    gl_Position = a_Position;
+}

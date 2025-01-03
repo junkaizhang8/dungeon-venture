@@ -5,8 +5,10 @@
 
 namespace Engine
 {
-    Mesh::Mesh(const std::string& name, std::vector<Vertex>& vertices,
-               std::vector<unsigned int>& indices, MeshType type, DrawMode mode)
+    Mesh::Mesh(const std::string& name, const std::vector<Vertex>& vertices,
+               const std::vector<unsigned int>& indices, MeshType type,
+               DrawMode mode,
+               const std::optional<CustomBufferLayoutPair>& custom)
         : name(name),
           vertices(vertices),
           indices(indices),
@@ -45,6 +47,36 @@ namespace Engine
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                               (void*)offsetof(Vertex, texCoords));
 
+        // If there are custom attributes, set the vertex attribute pointers
+        if (custom)
+        {
+            const auto& buffer = custom->buffer;
+            const auto& layout = custom->layout;
+            unsigned int offset = 0;
+            const auto& elements = layout.getElements();
+
+            // Create the custom buffer object
+            glGenBuffers(1, &customvbo);
+            // Bind the custom buffer object and load the custom data
+            glBindBuffer(GL_ARRAY_BUFFER, customvbo);
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float),
+                         &buffer[0], static_cast<GLenum>(mode));
+
+            hasCustom = true;
+
+            // Set the custom attribute pointers
+            for (unsigned int i = 0; i < elements.size(); ++i)
+            {
+                const auto& element = elements[i];
+                glEnableVertexAttribArray(i + 3);
+                glVertexAttribPointer(
+                    i + 3, element.count, element.type, element.normalized,
+                    layout.getStride(),
+                    reinterpret_cast<const void*>(std::uintptr_t(offset)));
+                offset += element.count * sizeof(float);
+            }
+        }
+
         // Unbind the vertex array
         glBindVertexArray(0);
         // Unbind the vertex buffer
@@ -59,6 +91,12 @@ namespace Engine
         glDeleteVertexArrays(1, &vao);
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ibo);
+
+        // Delete the custom buffer object if it exists
+        if (hasCustom)
+        {
+            glDeleteBuffers(1, &customvbo);
+        }
     }
 
     void Mesh::draw(const Shader& shader)

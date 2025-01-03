@@ -1,5 +1,8 @@
 #pragma once
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
@@ -13,10 +16,9 @@ namespace Engine
      */
     enum class ShaderType
     {
-        VERTEX,
-        FRAGMENT,
-        GEOMETRY,
-        COMPUTE
+        VERTEX = GL_VERTEX_SHADER,
+        FRAGMENT = GL_FRAGMENT_SHADER,
+        GEOMETRY = GL_GEOMETRY_SHADER
     };
 
     /**

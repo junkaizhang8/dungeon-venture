@@ -26,24 +26,6 @@ namespace Engine
         throw std::runtime_error("Failed to open file: " + filePath);
     }
 
-    // Convert a shader type to an OpenGL enum
-    static unsigned int castShaderType(ShaderType type)
-    {
-        switch (type)
-        {
-            case ShaderType::VERTEX:
-                return GL_VERTEX_SHADER;
-            case ShaderType::FRAGMENT:
-                return GL_FRAGMENT_SHADER;
-            case ShaderType::GEOMETRY:
-                return GL_GEOMETRY_SHADER;
-            case ShaderType::COMPUTE:
-                return GL_COMPUTE_SHADER;
-        }
-        LOG_ERROR("Invalid shader type");
-        return 0;
-    }
-
     Shader::~Shader() { glDeleteProgram(id); }
 
     void Shader::bind() const { glUseProgram(id); }
@@ -57,7 +39,7 @@ namespace Engine
         std::string code = readFile(path);
         const char* src = code.c_str();
 
-        shader = glCreateShader(castShaderType(type));
+        shader = glCreateShader(static_cast<GLenum>(type));
         glShaderSource(shader, 1, &src, nullptr);
         glCompileShader(shader);
 
@@ -72,19 +54,13 @@ namespace Engine
         id = glCreateProgram();
 
         // Attach the shaders to the program
-        for (const auto& shader : shaders)
-        {
-            glAttachShader(id, shader.second);
-        }
+        for (const auto& shader : shaders) glAttachShader(id, shader.second);
 
         // Link the program
         glLinkProgram(id);
 
         // Clean up the shaders (not needed after linking)
-        for (const auto& shader : shaders)
-        {
-            glDeleteShader(shader.second);
-        }
+        for (const auto& shader : shaders) glDeleteShader(shader.second);
     }
 
     void Shader::setUniform1i(const std::string& name, int value) const

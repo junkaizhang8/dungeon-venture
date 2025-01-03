@@ -134,7 +134,7 @@ namespace Engine
         void updateProjectionMatrix() override;
 
     private:
-        // The zoom level of the camera
+        // The zoom level of the camera (higher zoom = farther away)
         float zoom = 1.0f;
         // The zoom rate of the camera
         float zoomRate = 0.1f;

@@ -6,13 +6,13 @@ namespace Engine
 {
     LayerStack::~LayerStack()
     {
-        for (auto layer : layers) delete layer;
+        for (auto& layer : layers) delete layer;
     }
 
     void LayerStack::pushLayer(Layer* layer)
     {
         // Check if the layer is already in the stack
-        auto it = std::find(layers.begin(), layers.end(), layer);
+        const auto& it = std::find(layers.begin(), layers.end(), layer);
         if (it != layers.end()) return;
 
         // Push the layer onto the stack
@@ -23,7 +23,7 @@ namespace Engine
     void LayerStack::popLayer(Layer* layer)
     {
         // Find the layer in the stack
-        auto it = std::find(layers.begin(), layers.end(), layer);
+        const auto& it = std::find(layers.begin(), layers.end(), layer);
         if (it != layers.end())
         {
             // Pop the layer from the stack
