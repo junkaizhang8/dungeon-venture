@@ -236,7 +236,5 @@ namespace Engine
         unsigned int ibo;
         // The custom attribute buffer object
         unsigned int customvbo;
-        // Flag indicating if the mesh has custom attributes
-        bool hasCustom = false;
     };
 }  // namespace Engine

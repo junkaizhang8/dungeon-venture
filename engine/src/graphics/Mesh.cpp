@@ -62,8 +62,6 @@ namespace Engine
             glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float),
                          &buffer[0], static_cast<GLenum>(mode));
 
-            hasCustom = true;
-
             // Set the custom attribute pointers
             for (unsigned int i = 0; i < elements.size(); ++i)
             {
@@ -93,10 +91,7 @@ namespace Engine
         glDeleteBuffers(1, &ibo);
 
         // Delete the custom buffer object if it exists
-        if (hasCustom)
-        {
-            glDeleteBuffers(1, &customvbo);
-        }
+        if (customvbo) glDeleteBuffers(1, &customvbo);
     }
 
     void Mesh::draw(const Shader& shader)
