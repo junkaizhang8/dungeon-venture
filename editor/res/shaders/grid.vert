@@ -9,7 +9,7 @@ out float v_LineWeight;
 
 void main()
 {
+    gl_Position = a_Position;
     v_Color = a_Color;
     v_LineWeight = a_LineWeight;
-    gl_Position = a_Position;
 }

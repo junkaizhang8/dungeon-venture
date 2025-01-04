@@ -26,15 +26,19 @@ namespace Engine
          * @brief Constructs a new 2D camera object.
          *
          * This constructor creates a new 2D camera object with the specified
-         * position, zoom level, aspect ratio, and rotation enabled flag.
+         * position, width, height, zoom level, minimum zoom level, maximum zoom
+         * level, and rotation flag.
          *
          * @param position The position of the camera.
+         * @param width The width of the camera.
+         * @param height The height of the camera.
          * @param zoom The zoom level of the camera.
-         * @param width The width of the window.
-         * @param height The height of the window.
-         * @param rotationEnabled Whether or not rotation is enabled.
+         * @param minZoom The minimum zoom level of the camera.
+         * @param maxZoom The maximum zoom level of the camera.
+         * @param rotationEnabled A flag indicating whether rotation is enabled.
          */
-        Camera2D(glm::vec3 position, float zoom, float width, float height,
+        Camera2D(glm::vec3 position, float width, float height, float zoom,
+                 float minZoom = 0.1f, float maxZoom = 10.0f,
                  bool rotationEnabled = false);
 
         /**
@@ -135,13 +139,13 @@ namespace Engine
 
     private:
         // The zoom level of the camera (higher zoom = farther away)
-        float zoom = 1.0f;
+        float zoom;
         // The zoom rate of the camera
         float zoomRate = 0.1f;
         // The minimum level of zoom
-        float minZoom = 0.1f;
+        float minZoom;
         // The maximum level of zoom
-        float maxZoom = 10.0f;
+        float maxZoom;
 
         // Drag sensitivity of the camera
         float dragSensitivity = 1.0f;

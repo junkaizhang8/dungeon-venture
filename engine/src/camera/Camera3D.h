@@ -29,15 +29,16 @@ namespace Engine
          * rotation enabled flag.
          *
          * @param position The position of the camera.
+         * @param width The width of the window.
+         * @param height The height of the window.
          * @param worldUp The world up vector.
          * @param near The near plane.
          * @param far The far plane.
-         * @param width The width of the window.
-         * @param height The height of the window.
-         * @param rotationEnabled Whether or not rotation is enabled.
+         * @param rotationEnabled A flag indicating whether rotation is enabled.
          */
-        Camera3D(glm::vec3 position, glm::vec3 worldUp, float near, float far,
-                 float width, float height, bool rotationEnabled = false);
+        Camera3D(glm::vec3 position, float width, float height,
+                 glm::vec3 worldUp, float near, float far,
+                 bool rotationEnabled = false);
 
         /**
          * @brief Updates the camera.

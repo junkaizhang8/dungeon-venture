@@ -9,7 +9,7 @@ class Grid
 public:
     Grid();
 
-    void draw(const Camera2D& camera) const;
+    void draw(float gridSpacing, const Camera2D& camera) const;
 
 private:
     Shader shader;

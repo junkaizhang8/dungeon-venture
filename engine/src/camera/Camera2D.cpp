@@ -5,9 +5,13 @@
 
 namespace Engine
 {
-    Camera2D::Camera2D(glm::vec3 position, float zoom, float width,
-                       float height, bool rotationEnabled)
-        : Camera(position, width, height, rotationEnabled), zoom(zoom)
+    Camera2D::Camera2D(glm::vec3 position, float width, float height,
+                       float zoom, float minZoom, float maxZoom,
+                       bool rotationEnabled)
+        : Camera(position, width, height, rotationEnabled),
+          zoom(zoom),
+          minZoom(minZoom),
+          maxZoom(maxZoom)
     {
         std::pair<float, float> cursorPos = Input::getMousePosition();
         prevCursorX = cursorPos.first;

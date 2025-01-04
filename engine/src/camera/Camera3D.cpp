@@ -4,8 +4,8 @@
 
 namespace Engine
 {
-    Camera3D::Camera3D(glm::vec3 position, glm::vec3 worldUp, float near,
-                       float far, float width, float height,
+    Camera3D::Camera3D(glm::vec3 position, float width, float height,
+                       glm::vec3 worldUp, float near, float far,
                        bool rotationEnabled)
         : Camera(position, width, height, rotationEnabled),
           worldUp(worldUp),

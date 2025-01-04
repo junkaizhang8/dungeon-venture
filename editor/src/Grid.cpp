@@ -2,34 +2,19 @@
 
 Grid::Grid()
 {
-    shader.addShader(ShaderType::VERTEX, "res/shaders/grid_shader.vert");
-    shader.addShader(ShaderType::GEOMETRY, "res/shaders/grid_shader.geom");
-    shader.addShader(ShaderType::FRAGMENT, "res/shaders/grid_shader.frag");
+    shader.addShader(ShaderType::VERTEX, "res/shaders/grid.vert");
+    shader.addShader(ShaderType::GEOMETRY, "res/shaders/grid.geom");
+    shader.addShader(ShaderType::FRAGMENT, "res/shaders/grid.frag");
     shader.compileShader();
 }
 
-void Grid::draw(const Camera2D& camera) const
+void Grid::draw(float gridSpacing, const Camera2D& camera) const
 {
     glm::vec3 cameraPos = camera.getPosition();
     float width = Application::getInstance().getWindow().getWidth();
     float height = Application::getInstance().getWindow().getHeight();
 
     float zoom = camera.getZoom();
-
-    float gridSpacing;
-
-    if (zoom < 0.25f)
-        gridSpacing = 10.0f;
-    else if (zoom < 0.5f)
-        gridSpacing = 20.0f;
-    else if (zoom < 2.0f)
-        gridSpacing = 40.0f;
-    else if (zoom < 4.0f)
-        gridSpacing = 80.0f;
-    else if (zoom < 8.0f)
-        gridSpacing = 160.0f;
-    else
-        gridSpacing = 320.0f;
 
     float majorGridSpacing = gridSpacing * 4;
 
@@ -56,8 +41,8 @@ void Grid::draw(const Camera2D& camera) const
     float majorLineWeight = 1.0f * zoom;
     float minorLineWeight = 0.5f * zoom;
 
-    glm::vec4 axisColor = {0.8f, 0.8f, 0.8f, 1.0f};
-    glm::vec4 majorColor = {0.7f, 0.7f, 0.7f, 1.0f};
+    glm::vec4 axisColor = {0.7f, 0.7f, 0.7f, 1.0f};
+    glm::vec4 majorColor = {0.6f, 0.6f, 0.6f, 1.0f};
     glm::vec4 minorColor = {0.5f, 0.5f, 0.5f, 1.0f};
 
     // Draw vertical lines
@@ -87,6 +72,9 @@ void Grid::draw(const Camera2D& camera) const
             customBuffer.push_back(minorLineWeight);
             customBuffer.push_back(minorLineWeight);
         }
+
+        indices.push_back(indices.size());
+        indices.push_back(indices.size());
     }
 
     // Draw horizontal lines
@@ -116,11 +104,9 @@ void Grid::draw(const Camera2D& camera) const
             customBuffer.push_back(minorLineWeight);
             customBuffer.push_back(minorLineWeight);
         }
-    }
 
-    for (unsigned int i = 0; i < vertices.size(); i++)
-    {
-        indices.push_back(i);
+        indices.push_back(indices.size());
+        indices.push_back(indices.size());
     }
 
     layout.push(1);

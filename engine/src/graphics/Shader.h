@@ -85,9 +85,17 @@ namespace Engine
          * @brief Sets the Uniform1i object.
          *
          * @param name The name of the uniform.
-         * @param v0 The value.
+         * @param value The value.
          */
-        void setUniform1i(const std::string& name, int v0) const;
+        void setUniform1i(const std::string& name, int value) const;
+
+        /**
+         * @brief Sets the Uniform1f object.
+         *
+         * @param name The name of the uniform.
+         * @param value The value.
+         */
+        void setUniform1f(const std::string& name, float value) const;
 
         /**
          * @brief Sets the Uniform4f object.
