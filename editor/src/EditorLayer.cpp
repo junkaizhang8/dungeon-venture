@@ -77,6 +77,16 @@ void EditorLayer::drawComponents()
         vertexIndices.push_back(vertexIndices.size());
     }
 
+    // Draw vertex at nearest grid point
+    glm::vec4 cursorVertexColor = {0.7f, 0.7f, 0.7f, 0.5f};
+    // Convert cursor position to world space
+    glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
+
+    float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
+    float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
+    vertexList.push_back({{gridX, gridY, 0.0f}, cursorVertexColor});
+    vertexIndices.push_back(vertexIndices.size());
+
     Mesh lineMesh("lines", lineList, lineIndices, MeshType::LINES);
     Mesh vertexMesh("vertices", vertexList, vertexIndices, MeshType::POINTS);
 

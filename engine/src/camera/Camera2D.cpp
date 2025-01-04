@@ -13,9 +13,8 @@ namespace Engine
           minZoom(minZoom),
           maxZoom(maxZoom)
     {
-        std::pair<float, float> cursorPos = Input::getMousePosition();
-        prevCursorX = cursorPos.first;
-        prevCursorY = cursorPos.second;
+        glm::vec2 cursorPos = Input::getMousePosition();
+        prevCursorPos = {cursorPos.x, cursorPos.y};
 
         updateProjectionMatrix();
         updateViewMatrix();
@@ -56,6 +55,24 @@ namespace Engine
         }
     }
 
+    glm::vec2 Camera2D::screenToWorld(glm::vec2 cursor)
+    {
+        // Normalize cursor position to range [0, 1]
+        float normalizedX = cursor.x / width;
+        // Invert Y coordinate since OpenGL has origin at bottom left
+        float normalizedY = 1.0f - cursor.y / height;
+
+        // Map to normalized device coordinates (NDC) range [-1, 1]
+        float ndcX = 2.0f * normalizedX - 1.0f;
+        float ndcY = 2.0f * normalizedY - 1.0f;
+
+        // Map to world coordinates
+        float worldX = ndcX * width / 2.0f * zoom + position.x;
+        float worldY = ndcY * height / 2.0f * zoom + position.y;
+
+        return {worldX, worldY};
+    }
+
     void Camera2D::updateViewMatrix()
     {
         viewMatrix = glm::translate(glm::mat4(1.0f), -position);
@@ -92,8 +109,8 @@ namespace Engine
     {
         if (Input::isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
         {
-            float xOffset = event.getX() - prevCursorX;
-            float yOffset = event.getY() - prevCursorY;
+            float xOffset = event.getX() - prevCursorPos.x;
+            float yOffset = event.getY() - prevCursorPos.y;
 
             position.x -= xOffset * dragSensitivity * zoom;
             position.y += yOffset * dragSensitivity * zoom;
@@ -101,7 +118,6 @@ namespace Engine
             updateViewMatrix();
         }
 
-        prevCursorX = event.getX();
-        prevCursorY = event.getY();
+        prevCursorPos = {event.getX(), event.getY()};
     }
 }  // namespace Engine

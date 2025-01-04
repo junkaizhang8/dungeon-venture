@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utility>
+#include <glm/glm.hpp>
 
 namespace Engine
 {
@@ -42,7 +42,7 @@ namespace Engine
          *
          * @return A pair containing the x and y coordinates of the mouse.
          */
-        static std::pair<float, float> getMousePosition();
+        static glm::vec2 getMousePosition();
 
         /**
          * @brief Gets the x coordinate of the mouse.

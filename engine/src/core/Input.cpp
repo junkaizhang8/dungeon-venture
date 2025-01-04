@@ -27,7 +27,7 @@ namespace Engine
         return state == GLFW_PRESS;
     }
 
-    std::pair<float, float> Input::getMousePosition()
+    glm::vec2 Input::getMousePosition()
     {
         GLFWwindow* window =
             Application::getInstance().getWindow().getNativeWindow();
@@ -39,7 +39,7 @@ namespace Engine
         return {xpos, ypos};
     }
 
-    float Input::getMouseX() { return getMousePosition().first; }
+    float Input::getMouseX() { return getMousePosition().x; }
 
-    float Input::getMouseY() { return getMousePosition().second; }
+    float Input::getMouseY() { return getMousePosition().y; }
 }  // namespace Engine

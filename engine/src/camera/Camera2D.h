@@ -50,6 +50,8 @@ namespace Engine
          */
         void onUpdate(float deltaTime) override;
 
+        glm::vec2 screenToWorld(glm::vec2 cursor);
+
         /**
          * @brief Gets the zoom level of the camera.
          *
@@ -150,10 +152,8 @@ namespace Engine
         // Drag sensitivity of the camera
         float dragSensitivity = 1.0f;
 
-        // Previous cursor x position
-        float prevCursorX;
-        // Previous cursor y position
-        float prevCursorY;
+        // Previous cursor position
+        glm::vec2 prevCursorPos;
 
         /**
          * @brief Updates the movement speed of the camera.

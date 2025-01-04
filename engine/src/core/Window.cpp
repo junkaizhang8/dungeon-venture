@@ -152,6 +152,9 @@ namespace Engine
 
         // Enable point size
         glEnable(GL_PROGRAM_POINT_SIZE);
+        // Enable blending
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     Window::~Window() { destroy(); }
