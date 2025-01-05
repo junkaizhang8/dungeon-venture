@@ -15,6 +15,8 @@ struct Line
     int front;
     // Index of the back side
     int back;
+    // Flag indicating whether the line is deleted
+    bool deleted = false;
 
     /**
      * @brief Constructs a new Line object.

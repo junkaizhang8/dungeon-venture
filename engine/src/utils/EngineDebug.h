@@ -79,7 +79,7 @@ namespace Engine
         fprintf(stdout, "\n");                                             \
     }
 
-#define ENGINE_ASSERT(condition, ...)                    \
+#define ASSERT(condition, ...)                           \
     if (!(condition))                                    \
     {                                                    \
         LOG_ERROR("Assertion failed: (%s)", #condition); \

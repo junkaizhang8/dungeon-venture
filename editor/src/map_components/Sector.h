@@ -13,6 +13,8 @@ struct Sector
     float ceilingHeight;
     // Light level of the sector
     int lightLevel;
+    // Flag indicating whether the sector is deleted
+    bool deleted = false;
 
     /**
      * @brief Constructs a new Sector object.

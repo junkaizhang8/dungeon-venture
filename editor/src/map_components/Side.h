@@ -9,6 +9,8 @@ struct Side
 {
     // Index of the sector that the side belongs to
     int sector;
+    // Flag indicating whether the side is deleted
+    bool deleted = false;
 
     /**
      * @brief Constructs a new Side object.

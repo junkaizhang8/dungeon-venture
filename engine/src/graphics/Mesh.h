@@ -7,31 +7,13 @@
 #include <optional>
 #include <string>
 
+#include "CustomAttributeLayout.h"
 #include "Shader.h"
+#include "Vertex.h"
 #include "utils/EngineDebug.h"
 
 namespace Engine
 {
-    /**
-     * @brief A struct that represents a vertex.
-     *
-     * This struct represents a vertex in a mesh. A vertex may contain the
-     * following attributes, where [ ] denotes the location of the attribute in
-     * the shader and ( ) denotes the type of the attribute:
-     *
-     * - [0] (vec3) position: The xyz values of the vertex.
-     *
-     * - [1] (vec4) color: The rgba values of the vertex.
-     *
-     * - [2] (vec2) texCoords: The texture coordinates of the vertex.
-     */
-    struct Vertex
-    {
-        glm::vec3 position;
-        glm::vec4 color;
-        glm::vec2 texCoords;
-    };
-
     /**
      * @brief An enum class that represents the type of mesh.
      *
@@ -56,108 +38,6 @@ namespace Engine
     };
 
     /**
-     * @brief A class representing a custom vertex buffer layout.
-     *
-     * This class represents the layout of a vertex buffer. It is used to
-     * specify the layout of the data in a custom vertex buffer, indicating the
-     * different vertex attributes through pushing elements of different types
-     * to the layout. If used in conjunction with a mesh, the layout locations
-     * of the custom attributes will start at 3, as the first three locations
-     * are reserved for the standard vertex attributes.
-     */
-    class CustomAttributeLayout
-    {
-    public:
-        /**
-         * @brief A struct representing a custom attribute.
-         *
-         * This struct represents a single custom attribute in a custom vertex
-         * attribute layout. Each element has a type indicating the OpenGL type
-         * of the vertex attribute, a count indicating the number of elements in
-         * the vertex attribute, and a flag indicating whether the data should
-         * be normalized.
-         */
-        struct CustomAttribute
-        {
-            unsigned int type;
-            unsigned int count;
-            unsigned char normalized;
-        };
-
-        /**
-         * @brief Creates a new CustomAttributeLayout object.
-         *
-         * This constructor creates a new CustomAttributeLayout object with an
-         * empty layout.
-         */
-        CustomAttributeLayout() : stride(0) {}
-
-        /**
-         * @brief Pushes a new custom attribute of type float to the layout.
-         *
-         * This method pushes a new custom attribute of type float to the
-         * layout.
-         *
-         * @param count The number of floats in the custom attribute.
-         */
-        void push(unsigned int count)
-        {
-            elements.push_back({GL_FLOAT, count, GL_FALSE});
-            stride += count * sizeof(float);
-        }
-
-        /**
-         * @brief Gets the elements in the layout.
-         *
-         * @return A vector containing the elements in the layout.
-         */
-        inline const std::vector<CustomAttribute>& getElements() const
-        {
-            return elements;
-        }
-
-        /**
-         * @brief Gets the stride of the layout.
-         *
-         * @return The stride of the layout.
-         */
-        inline unsigned int getStride() const { return stride; }
-
-    private:
-        // The elements in the layout
-        std::vector<CustomAttribute> elements;
-        // The stride of the layout
-        unsigned int stride;
-    };
-
-    /**
-     * @brief A struct representing a custom buffer layout pair.
-     *
-     * This struct represents a pair of a custom buffer and a custom attribute
-     * layout. It is used to define custom attributes for a mesh.
-     */
-    struct CustomBufferLayoutPair
-    {
-        std::vector<float> buffer;
-        CustomAttributeLayout layout;
-
-        /**
-         * @brief Constructs a new CustomBufferLayoutPair object.
-         *
-         * This constructor creates a new CustomBufferLayoutPair object with the
-         * specified buffer and layout.
-         *
-         * @param buffer The buffer containing the custom attributes.
-         * @param layout The layout of the custom attributes.
-         */
-        CustomBufferLayoutPair(const std::vector<float>& buffer,
-                               const CustomAttributeLayout& layout)
-            : buffer(buffer), layout(layout)
-        {
-        }
-    };
-
-    /**
      * @brief A class that represents a mesh.
      *
      * This class represents a mesh that can be drawn in the scene. A mesh is
@@ -179,15 +59,15 @@ namespace Engine
          * @param indices The indices of the mesh.
          * @param type The type of the mesh. Defaults to MeshType::TRIANGLES.
          * @param mode The draw mode of the mesh. Defaults to DrawMode::STATIC.
-         * @param custom An optional buffer-layout pair for defining custom
-         * attributes for the mesh. Defaults to std::nullopt.
+         * @param customLayout An optional custom attribute layout for the mesh.
+         * Defaults to std::nullopt.
          */
-        Mesh(
-            const std::string& name, const std::vector<Vertex>& vertices,
-            const std::vector<unsigned int>& indices,
-            MeshType type = MeshType::TRIANGLES,
-            DrawMode mode = DrawMode::STATIC,
-            const std::optional<CustomBufferLayoutPair>& custom = std::nullopt);
+        Mesh(const std::string& name, const std::vector<Vertex>& vertices,
+             const std::vector<unsigned int>& indices,
+             MeshType type = MeshType::TRIANGLES,
+             DrawMode mode = DrawMode::STATIC,
+             const std::optional<CustomAttributeLayout>& customLayout =
+                 std::nullopt);
 
         /**
          * @brief Destroys the Mesh object.
@@ -207,6 +87,222 @@ namespace Engine
         void draw(const Shader& shader);
 
         /**
+         * @brief Attaches a custom buffer to the mesh.
+         *
+         * This method attaches a custom buffer to the mesh at the specified
+         * index. The buffer must be a vector of the specified type. The method
+         * will generate a buffer object and bind the buffer to the mesh.
+         *
+         * @tparam T The type of the buffer.
+         * @param index The index of the custom attribute in the shader.
+         * @param buffer The buffer to attach to the mesh.
+         */
+        template <typename T>
+        void attachCustomBuffer(int index, const std::vector<T>& buffer)
+        {
+            static_assert(false);
+        }
+
+        /**
+         * @brief Attaches a custom float buffer to the mesh.
+         *
+         * This method attaches a custom float buffer to the mesh at the
+         * specified index. The buffer must be a vector of floats. The method
+         * will generate a buffer object and bind the buffer to the mesh.
+         *
+         * @param index The index of the custom attribute in the shader.
+         * @param buffer The buffer to attach to the mesh.
+         */
+        template <>
+        void attachCustomBuffer<float>(int index,
+                                       const std::vector<float>& buffer)
+        {
+            if (!hasCustomLayout)
+            {
+                LOG_WARN("Custom layout not found");
+                return;
+            }
+
+            const CustomAttribute* attribute = customLayout.getElement(index);
+
+            if (!attribute)
+            {
+                LOG_WARN("Custom attribute at index %d not found", index);
+                return;
+            }
+
+            ASSERT(attribute->type == AttributeType::FLOAT,
+                   "Buffer type must be float");
+
+            ASSERT(buffer.size() / attribute->count == vertices.size(),
+                   "Invalid buffer size");
+
+            glGenBuffers(1,
+                         &customvbos.at(index - Vertex::getAttributeCount()));
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER,
+                         customvbos.at(index - Vertex::getAttributeCount()));
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float),
+                         &buffer[0], static_cast<GLenum>(mode));
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, attribute->count, GL_FLOAT,
+                                  attribute->normalized, 0, (void*)0);
+            // Unbind the buffer
+            glBindVertexArray(0);
+            // Unbind the vertex buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        /**
+         * @brief Attaches a custom int buffer to the mesh.
+         *
+         * This method attaches a custom int buffer to the mesh at the specified
+         * index. The buffer must be a vector of ints. The method will generate
+         * a buffer object and bind the buffer to the mesh.
+         *
+         * @param index The index of the custom attribute in the shader.
+         * @param buffer The buffer to attach to the mesh.
+         */
+        template <>
+        void attachCustomBuffer<int>(int index, const std::vector<int>& buffer)
+        {
+            if (!hasCustomLayout)
+            {
+                LOG_WARN("Custom layout not found");
+                return;
+            }
+
+            const CustomAttribute* attribute = customLayout.getElement(index);
+
+            if (!attribute)
+            {
+                LOG_WARN("Custom attribute at index %d not found", index);
+                return;
+            }
+
+            ASSERT(attribute->type == AttributeType::INT,
+                   "Buffer type must be int");
+
+            ASSERT(buffer.size() / attribute->count == vertices.size(),
+                   "Invalid buffer size");
+
+            glGenBuffers(1,
+                         &customvbos.at(index - Vertex::getAttributeCount()));
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER,
+                         customvbos.at(index - Vertex::getAttributeCount()));
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(int),
+                         &buffer[0], static_cast<GLenum>(mode));
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, attribute->count, GL_INT,
+                                  attribute->normalized, 0, (void*)0);
+            // Unbind the buffer
+            glBindVertexArray(0);
+            // Unbind the vertex buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        /**
+         * @brief Attaches a custom unsigned int buffer to the mesh.
+         *
+         * This method attaches a custom unsigned int buffer to the mesh at the
+         * specified index. The buffer must be a vector of unsigned ints. The
+         * method will generate a buffer object and bind the buffer to the mesh.
+         *
+         * @param index The index of the custom attribute in the shader.
+         * @param buffer The buffer to attach to the mesh.
+         */
+        template <>
+        void attachCustomBuffer<unsigned int>(
+            int index, const std::vector<unsigned int>& buffer)
+        {
+            if (!hasCustomLayout)
+            {
+                LOG_WARN("Custom layout not found");
+                return;
+            }
+
+            const CustomAttribute* attribute = customLayout.getElement(index);
+
+            if (!attribute)
+            {
+                LOG_WARN("Custom attribute at index %d not found", index);
+                return;
+            }
+
+            ASSERT(attribute->type == AttributeType::UNSIGNED_INT,
+                   "Buffer type must be unsigned int");
+
+            ASSERT(buffer.size() / attribute->count == vertices.size(),
+                   "Invalid buffer size");
+
+            glGenBuffers(1,
+                         &customvbos.at(index - Vertex::getAttributeCount()));
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER,
+                         customvbos.at(index - Vertex::getAttributeCount()));
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(unsigned int),
+                         &buffer[0], static_cast<GLenum>(mode));
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, attribute->count, GL_UNSIGNED_INT,
+                                  attribute->normalized, 0, (void*)0);
+            // Unbind the buffer
+            glBindVertexArray(0);
+            // Unbind the vertex buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        /**
+         * @brief Attaches a custom unsigned char buffer to the mesh.
+         *
+         * This method attaches a custom unsigned char buffer to the mesh at the
+         * specified index. The buffer must be a vector of unsigned chars. The
+         * method will generate a buffer object and bind the buffer to the mesh.
+         *
+         * @param index The index of the custom attribute in the shader.
+         * @param buffer The buffer to attach to the mesh.
+         */
+        template <>
+        void attachCustomBuffer<unsigned char>(
+            int index, const std::vector<unsigned char>& buffer)
+        {
+            if (!hasCustomLayout)
+            {
+                LOG_WARN("Custom layout not found");
+                return;
+            }
+
+            const CustomAttribute* attribute = customLayout.getElement(index);
+
+            if (!attribute)
+            {
+                LOG_WARN("Custom attribute at index %d not found", index);
+                return;
+            }
+
+            ASSERT(attribute->type == AttributeType::UNSIGNED_INT,
+                   "Buffer type must be unsigned char");
+
+            ASSERT(buffer.size() / attribute->count == vertices.size(),
+                   "Invalid buffer size");
+
+            glGenBuffers(1,
+                         &customvbos.at(index - Vertex::getAttributeCount()));
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER,
+                         customvbos.at(index - Vertex::getAttributeCount()));
+            glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(unsigned char),
+                         &buffer[0], static_cast<GLenum>(mode));
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, attribute->count, GL_UNSIGNED_BYTE,
+                                  attribute->normalized, 0, (void*)0);
+            // Unbind the buffer
+            glBindVertexArray(0);
+            // Unbind the vertex buffer
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        /**
          * @brief Gets the name of the mesh.
          *
          * This method returns the name of the mesh.
@@ -222,6 +318,10 @@ namespace Engine
         std::vector<Vertex> vertices;
         // The indices of the mesh
         std::vector<unsigned int> indices;
+        // The custom attribute layout of the mesh
+        CustomAttributeLayout customLayout;
+        // Flag indicating whether the mesh has a custom layout
+        bool hasCustomLayout;
 
         // The type of the mesh
         MeshType type;
@@ -234,7 +334,7 @@ namespace Engine
         unsigned int vbo;
         // The index buffer object
         unsigned int ibo;
-        // The custom attribute buffer object
-        unsigned int customvbo;
+        // A vector of custom vertex buffer objects
+        std::vector<unsigned int> customvbos;
     };
 }  // namespace Engine

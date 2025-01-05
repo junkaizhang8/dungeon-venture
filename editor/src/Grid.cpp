@@ -109,10 +109,11 @@ void Grid::draw(float gridSpacing, const Camera2D& camera) const
         indices.push_back(indices.size());
     }
 
-    layout.push(1);
+    int index = layout.addAttribute(AttributeType::FLOAT, 1);
 
-    Mesh mesh("grid", vertices, indices, MeshType::LINES, DrawMode::DYNAMIC,
-              CustomBufferLayoutPair(customBuffer, layout));
+    Mesh mesh("grid", vertices, indices, MeshType::LINES, DrawMode::STATIC,
+              layout);
+    mesh.attachCustomBuffer(index, customBuffer);
 
     shader.bind();
     shader.setUniformMat4f("u_VP", camera.getViewProjectionMatrix());

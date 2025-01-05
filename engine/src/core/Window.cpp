@@ -32,7 +32,7 @@ namespace Engine
         if (!glfwInitialized)
         {
             int success = glfwInit();
-            ENGINE_ASSERT(success);
+            ASSERT(success);
 
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -45,13 +45,13 @@ namespace Engine
 
         window = glfwCreateWindow(data.width, data.height, data.title.c_str(),
                                   nullptr, nullptr);
-        ENGINE_ASSERT(window);
+        ASSERT(window);
         glfwMakeContextCurrent(window);
 
         if (!glewInitialized)
         {
             int status = glewInit();
-            ENGINE_ASSERT(status == GLEW_OK);
+            ASSERT(status == GLEW_OK);
             glewInitialized = true;
         }
 
