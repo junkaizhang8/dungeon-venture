@@ -28,14 +28,12 @@ EditorLayer::EditorLayer()
                                   "res/shaders/line_vertex.frag");
     phantomVertexShader.compileShader();
 
-    // Temporary line for demo
-    int start = addLineVertex(-80.0f, -80.0f);
-    int end = addLineVertex(-80.0f, 80.0f);
-    addLine(start, end);
-
     // Add event handlers
     dispatcher.addHandler<MouseScrolledEvent>([this](MouseScrolledEvent& event)
                                               { onMouseScroll(event); });
+    dispatcher.addHandler<MouseButtonPressedEvent>(
+        [this](MouseButtonPressedEvent& event) { onMouseButtonPress(event); });
+
     dispatcher.addHandler<KeyPressedEvent>([this](KeyPressedEvent& event)
                                            { onKeyPress(event); });
 }
@@ -49,7 +47,10 @@ void EditorLayer::onUpdate(float deltaTime)
     camera.onUpdate(deltaTime);
     grid.draw(gridSpacing, camera);
     drawComponents();
-    if (insertMode) drawPhantomVertex();
+    if (insertMode)
+    {
+        handleInsertMode();
+    }
 }
 
 void EditorLayer::onEvent(Event& event)
@@ -87,44 +88,20 @@ void EditorLayer::drawComponents()
     lineVertexShader.unbind();
 }
 
-void EditorLayer::drawPhantomVertex()
+int EditorLayer::getVertexIndex(glm::vec2 worldPos, float threshold)
 {
-    // Convert cursor position to world space
-    glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
-
-    float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
-    float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
-
-    // Draw phantom vertex
-    Mesh phantomVertexMesh("phantomVertex", {{{gridX, gridY, 0.0f}}}, {0},
-                           MeshType::POINTS);
-
-    phantomVertexShader.bind();
-    phantomVertexShader.setUniformMat4f("u_VP",
-                                        camera.getViewProjectionMatrix());
-    phantomVertexMesh.draw(phantomVertexShader);
-    phantomVertexShader.unbind();
-}
-
-int EditorLayer::getVertexIndex(glm::vec2 worldPos)
-{
-    float threshold = 10.0f;
-
     for (int i = 0; i < lineVertices.size(); ++i)
     {
         const LineVertex& vertex = lineVertices.at(i);
         glm::vec2 vertexPos = {vertex.x, vertex.y};
-        if (glm::distance(worldPos, vertexPos) < threshold) return i;
+        if (glm::distance(worldPos, vertexPos) <= threshold) return i;
     }
 
     return -1;
 }
 
-int EditorLayer::getLineIndex(glm::vec2 worldPos)
+int EditorLayer::getLineIndex(glm::vec2 worldPos, float threshold)
 {
-    // Threshold for selecting a line
-    float threshold = 10.0f;
-
     for (int i = 0; i < lines.size(); ++i)
     {
         const Line& line = lines.at(i);
@@ -147,7 +124,7 @@ int EditorLayer::getLineIndex(glm::vec2 worldPos)
         glm::vec2 projection = startVertex + scalar * startToEnd;
 
         float distance = glm::distance(worldPos, projection);
-        if (distance < threshold) return i;
+        if (distance <= threshold) return i;
     }
 
     return -1;
@@ -196,7 +173,8 @@ int EditorLayer::getIndexInVertexVBO(int vertex)
 int EditorLayer::addLineVertex(float x, float y)
 {
     // Check if the vertex already exists
-    if (getVertexIndex({x, y}) != -1) return -1;
+    int index = getVertexIndex({x, y});
+    if (index != -1) return index;
 
     // Add the vertex to the list
     int vertexIndex = getFreeVertexIndex();
@@ -371,6 +349,52 @@ int EditorLayer::getFreeLineIndex()
     return -1;
 }
 
+void EditorLayer::handleInsertMode()
+{
+    if (!insertMode) return;
+
+    glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
+    float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
+    float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
+
+    if (tempStartVertex)
+    {
+        // Draw new line from temp start vertex to near cursor position
+        Mesh phantomLineMesh("newLine",
+                             {{{tempStartVertex->x, tempStartVertex->y, 0.0f}},
+                              {{gridX, gridY, 0.0f}}},
+                             {0, 1}, MeshType::LINES);
+
+        lineShader.bind();
+        lineShader.setUniform1f("u_LineWeight", 4.0f * camera.getZoom());
+        lineShader.setUniformMat4f("u_VP", camera.getViewProjectionMatrix());
+        phantomLineMesh.draw(lineShader);
+        lineShader.unbind();
+
+        // Draw temp start vertex
+        Mesh tempStartVertexMesh(
+            "tempStartVertex",
+            {{{tempStartVertex->x, tempStartVertex->y, 0.0f}}}, {0},
+            MeshType::POINTS);
+
+        lineVertexShader.bind();
+        lineVertexShader.setUniformMat4f("u_VP",
+                                         camera.getViewProjectionMatrix());
+        tempStartVertexMesh.draw(lineVertexShader);
+        lineVertexShader.unbind();
+    }
+
+    // Draw phantom vertex
+    Mesh phantomVertexMesh("phantomVertex", {{{gridX, gridY, 0.0f}}}, {0},
+                           MeshType::POINTS);
+
+    phantomVertexShader.bind();
+    phantomVertexShader.setUniformMat4f("u_VP",
+                                        camera.getViewProjectionMatrix());
+    phantomVertexMesh.draw(phantomVertexShader);
+    phantomVertexShader.unbind();
+}
+
 void EditorLayer::onMouseScroll(MouseScrolledEvent& event)
 {
     if (camera.getZoom() < 2.0f)
@@ -379,7 +403,45 @@ void EditorLayer::onMouseScroll(MouseScrolledEvent& event)
         gridSpacing = 80.0f;
 }
 
+void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
+{
+    if (!insertMode) return;
+
+    if (event.getButton() == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
+
+        float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
+        float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
+
+        if (!tempStartVertex)
+            tempStartVertex = std::make_unique<LineVertex>(gridX, gridY);
+        else
+        {
+            // Check if the start vertex is the same as the end vertex
+            if (tempStartVertex->x != gridX || tempStartVertex->y != gridY)
+            {
+                int startVertex =
+                    addLineVertex(tempStartVertex->x, tempStartVertex->y);
+                int endVertex = addLineVertex(gridX, gridY);
+                addLine(startVertex, endVertex);
+            }
+
+            tempStartVertex.reset();
+        }
+    }
+}
+
 void EditorLayer::onKeyPress(KeyPressedEvent& event)
 {
-    if (event.getKeyCode() == GLFW_KEY_E) insertMode = !insertMode;
+    if (event.getKeyCode() == GLFW_KEY_E)
+    {
+        if (insertMode)
+        {
+            insertMode = false;
+            tempStartVertex.reset();
+        }
+        else
+            insertMode = true;
+    }
 }

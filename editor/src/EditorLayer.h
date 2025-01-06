@@ -43,6 +43,8 @@ private:
     std::vector<Side> sides;
     // The list of sectors in the map
     std::vector<Sector> sectors;
+    // The temporary start vertex when placing a new line
+    std::unique_ptr<LineVertex> tempStartVertex;
 
     // Cached vertex list for drawing vertices
     std::vector<Vertex> vertexVBO;
@@ -78,31 +80,34 @@ private:
     void drawComponents();
 
     /**
-     * @brief Draws a phantom vertex near the cursor's position.
+     * @brief Gets the index of the vertex at the specified world position
+     * within the specified threshold.
      *
-     * This method draws a phantom vertex near the cursor's position.
-     */
-    void drawPhantomVertex();
-
-    /**
-     * @brief Gets the index of the vertex at the specified world position.
-     *
-     * This method gets the index of the vertex at the specified world position.
+     * This method gets the index of the vertex at the specified world position
+     * within the specified threshold. If no vertex is found, the method returns
+     * -1.
      *
      * @param worldPos The world position.
+     * @param threshold The threshold within which to search for a vertex.
+     * Defaults to 0.
      * @return The index of the vertex, or -1 if no vertex is found.
      */
-    int getVertexIndex(glm::vec2 worldPos);
+    int getVertexIndex(glm::vec2 worldPos, float threshold = 0.0f);
 
     /**
-     * @brief Gets the index of the line at the specified world position.
+     * @brief Gets the index of the line at the specified world position within
+     * the specified threshold.
      *
-     * This method gets the index of the line at the specified world position.
+     * This method gets the index of the line at the specified world position
+     * within the specified threshold. If no line is found, the method returns
+     * -1.
      *
      * @param worldPos The world position.
+     * @param threshold The threshold within which to search for a line.
+     * Defaults to 0.
      * @return The index of the line, or -1 if no line is found.
      */
-    int getLineIndex(glm::vec2 worldPos);
+    int getLineIndex(glm::vec2 worldPos, float threshold = 0.0f);
 
     /**
      * @brief Gets the index of the line that has the specified two vertices
@@ -143,28 +148,30 @@ private:
     /**
      * @brief Adds a line vertex at the specified position.
      *
-     * This method adds a line vertex at the specified position.
+     * This method adds a line vertex at the specified position. If a vertex
+     * already exists at the position, the method returns the index of the
+     * existing vertex.
      *
      * @param x The x coordinate of the vertex.
      * @param y The y coordinate of the vertex.
      *
-     * @return The index of the vertex, or -1 if the vertex already exists.
+     * @return The index of the vertex.
      */
     int addLineVertex(float x, float y);
 
     /**
      * @brief Adds a line with the specified start and end vertices.
      *
-     * This method adds a line with the specified start and end vertices. For
-     * efficiency, always call this function AFTER calling addVertex on the two
-     * vertices so that checking if the vertices are in the vertex VBO is
+     * This method adds a line with the specified start and end vertices. If the
+     * vertices are the same or the line already exists, the method returns -1.
+     * For efficiency, always call this function AFTER calling addVertex on the
+     * two vertices so that checking if the vertices are in the vertex VBO is
      * unnecessary.
      *
      * @param startVertex The index of the start vertex.
      * @param endVertex The index of the end vertex.
      *
-     * @return The index of the line, or -1 if the line is invalid or already
-     * exists.
+     * @return The index of the line.
      */
     int addLine(int startVertex, int endVertex);
 
@@ -237,6 +244,13 @@ private:
     int getFreeLineIndex();
 
     /**
+     * @brief Handles the insert mode.
+     *
+     * This method handles the insert mode.
+     */
+    void handleInsertMode();
+
+    /**
      * @brief Handles the mouse scroll event.
      *
      * This method handles the mouse scroll event.
@@ -244,6 +258,24 @@ private:
      * @param event The mouse scroll event.
      */
     void onMouseScroll(MouseScrolledEvent& event);
+
+    /**
+     * @brief Handles the mouse button press event.
+     *
+     * This method handles the mouse button press event.
+     *
+     * @param event The mouse button press event.
+     */
+    void onMouseButtonPress(MouseButtonPressedEvent& event);
+
+    /**
+     * @brief Handles the mouse button release event.
+     *
+     * This method handles the mouse button release event.
+     *
+     * @param event The mouse button release event.
+     */
+    void onMouseButtonRelease(MouseButtonReleasedEvent& event);
 
     /**
      * @brief Handles the key press event.
