@@ -6,6 +6,8 @@ using namespace Engine;
 
 Editor::Editor() : Application("Editor")
 {
+    pushLayer(new EditorLayer());
+
     dispatcher.addHandler<KeyPressedEvent>(
         [this](KeyPressedEvent& event)
         {

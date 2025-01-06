@@ -66,6 +66,9 @@ private:
     // The shader used to draw phantom vertices
     Shader phantomVertexShader;
 
+    // Flag indicating whether the editor is in insert mode
+    bool insertMode = false;
+
     /**
      * @brief Draws the components of the map.
      *
@@ -73,6 +76,13 @@ private:
      * vertices.
      */
     void drawComponents();
+
+    /**
+     * @brief Draws a phantom vertex near the cursor's position.
+     *
+     * This method draws a phantom vertex near the cursor's position.
+     */
+    void drawPhantomVertex();
 
     /**
      * @brief Gets the index of the vertex at the specified world position.
@@ -234,4 +244,13 @@ private:
      * @param event The mouse scroll event.
      */
     void onMouseScroll(MouseScrolledEvent& event);
+
+    /**
+     * @brief Handles the key press event.
+     *
+     * This method handles the key press event.
+     *
+     * @param event The key press event.
+     */
+    void onKeyPress(KeyPressedEvent& event);
 };

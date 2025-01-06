@@ -36,6 +36,8 @@ EditorLayer::EditorLayer()
     // Add event handlers
     dispatcher.addHandler<MouseScrolledEvent>([this](MouseScrolledEvent& event)
                                               { onMouseScroll(event); });
+    dispatcher.addHandler<KeyPressedEvent>([this](KeyPressedEvent& event)
+                                           { onKeyPress(event); });
 }
 
 void EditorLayer::onAttach() {}
@@ -47,6 +49,7 @@ void EditorLayer::onUpdate(float deltaTime)
     camera.onUpdate(deltaTime);
     grid.draw(gridSpacing, camera);
     drawComponents();
+    if (insertMode) drawPhantomVertex();
 }
 
 void EditorLayer::onEvent(Event& event)
@@ -82,7 +85,10 @@ void EditorLayer::drawComponents()
     lineVertexShader.setUniformMat4f("u_VP", camera.getViewProjectionMatrix());
     vertexMesh.draw(lineVertexShader);
     lineVertexShader.unbind();
+}
 
+void EditorLayer::drawPhantomVertex()
+{
     // Convert cursor position to world space
     glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
 
@@ -371,4 +377,9 @@ void EditorLayer::onMouseScroll(MouseScrolledEvent& event)
         gridSpacing = 40.0f;
     else
         gridSpacing = 80.0f;
+}
+
+void EditorLayer::onKeyPress(KeyPressedEvent& event)
+{
+    if (event.getKeyCode() == GLFW_KEY_E) insertMode = !insertMode;
 }
