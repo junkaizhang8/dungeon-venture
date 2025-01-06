@@ -3,11 +3,16 @@
 layout(lines) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-in vec4 v_Color[];
+in float v_Selected[];
 out vec4 g_Color;
 
 uniform float u_LineWeight;
 uniform mat4 u_VP;
+
+const float epsilon = 0.0001;
+
+const vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+const vec4 selectedColor = vec4(0.0, 1.0, 0.0, 1.0);
 
 void main()
 {
@@ -21,17 +26,22 @@ void main()
 
     vec4 offset = normal * r;
 
+    float p1Selected = v_Selected[0];
+    float p2Selected = v_Selected[1];
+    vec4 lineColor =
+        (p1Selected > epsilon && p2Selected > epsilon) ? selectedColor : color;
+
     gl_Position = u_VP * (p1 + offset);
-    g_Color = v_Color[0];
+    g_Color = lineColor;
     EmitVertex();
     gl_Position = u_VP * (p1 - offset);
-    g_Color = v_Color[0];
+    g_Color = lineColor;
     EmitVertex();
     gl_Position = u_VP * (p2 + offset);
-    g_Color = v_Color[0];
+    g_Color = lineColor;
     EmitVertex();
     gl_Position = u_VP * (p2 - offset);
-    g_Color = v_Color[0];
+    g_Color = lineColor;
     EmitVertex();
 
     EndPrimitive();

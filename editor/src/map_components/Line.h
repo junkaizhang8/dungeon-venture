@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../Selectable.h"
+
 /**
  * @brief A struct representing a line.
  *
  * This struct represents a line in the map editor.
  */
-struct Line
+struct Line : public Selectable
 {
     // Index of the start vertex
     int startVertex;
@@ -17,6 +19,8 @@ struct Line
     int back;
     // Flag indicating whether the line is deleted
     bool deleted = false;
+    // Flag indicating whether the line is selected
+    bool selected = false;
 
     /**
      * @brief Constructs a new Line object.

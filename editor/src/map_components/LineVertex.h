@@ -1,15 +1,22 @@
 #pragma once
 
+#include "../Selectable.h"
+
+// Epsilon value for floating point comparison
+static const float EPSILON = 0.0001f;
+
 /**
  * @brief A struct representing a line vertex.
  *
  * This struct represents a vertex of a line in the map editor.
  */
-struct LineVertex
+struct LineVertex : public Selectable
 {
     float x, y;
     // Flag indicating whether the vertex is deleted
     bool deleted = false;
+    // Flag indicating whether the vertex is selected
+    bool selected = false;
 
     /**
      * @brief Constructs a new LineVertex object.
@@ -33,6 +40,7 @@ struct LineVertex
      */
     bool operator==(const LineVertex& other) const
     {
-        return x == other.x && y == other.y;
+        return std::abs(x - other.x) < EPSILON &&
+               std::abs(y - other.y) < EPSILON;
     }
 };

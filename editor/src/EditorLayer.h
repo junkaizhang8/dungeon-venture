@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Grid.h"
+#include "SelectionManager.h"
 #include "map_components/Line.h"
 #include "map_components/LineVertex.h"
 #include "map_components/Sector.h"
@@ -68,6 +69,8 @@ private:
     std::queue<int> freeVertexIndices;
     // A queue of free (deleted) line indices
     std::queue<int> freeLineIndices;
+
+    SelectionManager selectionManager;
 
     // The shader used to draw the line vertices
     Shader lineVertexShader;
@@ -249,6 +252,13 @@ private:
     int getFreeLineIndex();
 
     /**
+     * @brief Handles the select mode.
+     *
+     * This method handles the select mode.
+     */
+    void handleSelectMode();
+
+    /**
      * @brief Handles the insert mode.
      *
      * This method handles the insert mode.
@@ -272,24 +282,6 @@ private:
      * @param event The mouse button press event.
      */
     void onMouseButtonPress(MouseButtonPressedEvent& event);
-
-    /**
-     * @brief Handles the mouse button release event.
-     *
-     * This method handles the mouse button release event.
-     *
-     * @param event The mouse button release event.
-     */
-    void onMouseButtonRelease(MouseButtonReleasedEvent& event);
-
-    /**
-     * @brief Handles the key press event.
-     *
-     * This method handles the key press event.
-     *
-     * @param event The key press event.
-     */
-    void onKeyPress(KeyPressedEvent& event);
 
     /**
      * @brief Handles the key release event.

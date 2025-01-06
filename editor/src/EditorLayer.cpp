@@ -47,7 +47,10 @@ void EditorLayer::onUpdate(float deltaTime)
     camera.onUpdate(deltaTime);
     grid.draw(gridSpacing, camera);
     drawComponents();
-    if (mode == EditorMode::INSERT) handleInsertMode();
+    if (mode == EditorMode::SELECT)
+        handleSelectMode();
+    else if (mode == EditorMode::INSERT)
+        handleInsertMode();
 }
 
 void EditorLayer::onEvent(Event& event)
@@ -178,7 +181,25 @@ int EditorLayer::addLineVertex(float x, float y)
     if (vertexIndex == -1)
     {
         vertexIndex = lineVertices.size();
-        lineVertices.emplace_back(x, y);
+        LineVertex vertex(x, y);
+        // Set the line vertex callbacks
+        vertex.onSelect = [this, vertexIndex](Selectable* vertex)
+        {
+            vertex->selected = true;
+            int vboIndex = getIndexInVertexVBO(vertexIndex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+            selectedVertices.at(vboIndex) = 1;
+        };
+        vertex.onDeselect = [this, vertexIndex](Selectable* vertex)
+        {
+            vertex->selected = false;
+            int vboIndex = getIndexInVertexVBO(vertexIndex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+            selectedVertices.at(vboIndex) = 0;
+        };
+        vertex.onDelete = [this, vertexIndex](Selectable* vertex)
+        { removeVertex(vertexIndex); };
+        lineVertices.push_back(vertex);
     }
     else
         lineVertices.at(vertexIndex) = {x, y};
@@ -210,7 +231,35 @@ int EditorLayer::addLine(int startVertex, int endVertex)
     if (lineIndex == -1)
     {
         lineIndex = lines.size();
-        lines.emplace_back(startVertex, endVertex);
+        Line line(startVertex, endVertex);
+        // Set the line callbacks
+        line.onSelect = [this, lineIndex](Selectable* line)
+        {
+            line->selected = true;
+            int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+                   lines.at(lineIndex).startVertex);
+            selectedVertices.at(vboIndex) = 1;
+            vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+                   lines.at(lineIndex).endVertex);
+            selectedVertices.at(vboIndex) = 1;
+        };
+        line.onDeselect = [this, lineIndex](Selectable* line)
+        {
+            line->selected = false;
+            int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+                   lines.at(lineIndex).startVertex);
+            selectedVertices.at(vboIndex) = 0;
+            vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
+            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+                   lines.at(lineIndex).endVertex);
+            selectedVertices.at(vboIndex) = 0;
+        };
+        line.onDelete = [this, lineIndex](Selectable* line)
+        { removeLine(lineIndex); };
+        lines.push_back(line);
     }
     else
         lines.at(lineIndex) = {startVertex, endVertex};
@@ -346,6 +395,11 @@ int EditorLayer::getFreeLineIndex()
     return -1;
 }
 
+void EditorLayer::handleSelectMode()
+{
+    if (mode != EditorMode::SELECT) return;
+}
+
 void EditorLayer::handleInsertMode()
 {
     if (mode != EditorMode::INSERT) return;
@@ -402,29 +456,55 @@ void EditorLayer::onMouseScroll(MouseScrolledEvent& event)
 
 void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
 {
-    if (mode != EditorMode::INSERT) return;
-
     if (event.getButton() == GLFW_MOUSE_BUTTON_LEFT)
     {
         glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
 
-        float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
-        float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
-
-        if (!tempStartVertex)
-            tempStartVertex = std::make_unique<LineVertex>(gridX, gridY);
-        else
+        if (mode == EditorMode::SELECT)
         {
-            // Check if the start vertex is the same as the end vertex
-            if (tempStartVertex->x != gridX || tempStartVertex->y != gridY)
+            int vertexIndex =
+                getVertexIndex(worldPos, 10.0f * camera.getZoom());
+            if (vertexIndex != -1)
             {
-                int startVertex =
-                    addLineVertex(tempStartVertex->x, tempStartVertex->y);
-                int endVertex = addLineVertex(gridX, gridY);
-                addLine(startVertex, endVertex);
+                LineVertex& vertex = lineVertices.at(vertexIndex);
+                bool isSelected = vertex.isSelected();
+                selectionManager.deselectAll();
+                if (!isSelected) selectionManager.select(&vertex);
+                return;
             }
 
-            tempStartVertex.reset();
+            int lineIndex = getLineIndex(worldPos, 6.0f);
+            if (lineIndex != -1)
+            {
+                Line& line = lines.at(lineIndex);
+                bool isSelected = line.isSelected();
+                selectionManager.deselectAll();
+                if (!isSelected) selectionManager.select(&line);
+                return;
+            }
+
+            selectionManager.deselectAll();
+        }
+        else if (mode == EditorMode::INSERT)
+        {
+            float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
+            float gridY = round(worldPos.y / gridSpacing) * gridSpacing;
+
+            if (!tempStartVertex)
+                tempStartVertex = std::make_unique<LineVertex>(gridX, gridY);
+            else
+            {
+                // Check if the start vertex is the same as the end vertex
+                if (tempStartVertex->x != gridX || tempStartVertex->y != gridY)
+                {
+                    int startVertex =
+                        addLineVertex(tempStartVertex->x, tempStartVertex->y);
+                    int endVertex = addLineVertex(gridX, gridY);
+                    addLine(startVertex, endVertex);
+                }
+
+                tempStartVertex.reset();
+            }
         }
     }
 }
@@ -439,7 +519,10 @@ void EditorLayer::onKeyRelease(KeyReleasedEvent& event)
     {
         case GLFW_KEY_E:
             if (mode != EditorMode::INSERT)
+            {
                 mode = EditorMode::INSERT;
+                selectionManager.deselectAll();
+            }
             else
             {
                 mode = EditorMode::SELECT;
@@ -450,5 +533,7 @@ void EditorLayer::onKeyRelease(KeyReleasedEvent& event)
             if (mode == EditorMode::INSERT) tempStartVertex.reset();
             mode = EditorMode::SELECT;
             break;
+        case GLFW_KEY_DELETE:
+            if (mode == EditorMode::SELECT) selectionManager.deleteSelected();
     }
 }
