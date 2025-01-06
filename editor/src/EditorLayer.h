@@ -14,6 +14,12 @@
 
 using namespace Engine;
 
+enum class EditorMode
+{
+    SELECT,
+    INSERT
+};
+
 class EditorLayer : public Layer
 {
 public:
@@ -28,6 +34,8 @@ public:
     void onEvent(Event& event) override;
 
 private:
+    EditorMode mode = EditorMode::SELECT;
+
     // The camera used to view the scene
     Camera2D camera;
     // The grid that is drawn in the scene
@@ -67,9 +75,6 @@ private:
     Shader lineShader;
     // The shader used to draw phantom vertices
     Shader phantomVertexShader;
-
-    // Flag indicating whether the editor is in insert mode
-    bool insertMode = false;
 
     /**
      * @brief Draws the components of the map.
@@ -285,4 +290,13 @@ private:
      * @param event The key press event.
      */
     void onKeyPress(KeyPressedEvent& event);
+
+    /**
+     * @brief Handles the key release event.
+     *
+     * This method handles the key release event.
+     *
+     * @param event The key release event.
+     */
+    void onKeyRelease(KeyReleasedEvent& event);
 };

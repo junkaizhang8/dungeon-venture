@@ -34,8 +34,8 @@ EditorLayer::EditorLayer()
     dispatcher.addHandler<MouseButtonPressedEvent>(
         [this](MouseButtonPressedEvent& event) { onMouseButtonPress(event); });
 
-    dispatcher.addHandler<KeyPressedEvent>([this](KeyPressedEvent& event)
-                                           { onKeyPress(event); });
+    dispatcher.addHandler<KeyReleasedEvent>([this](KeyReleasedEvent& event)
+                                            { onKeyRelease(event); });
 }
 
 void EditorLayer::onAttach() {}
@@ -47,10 +47,7 @@ void EditorLayer::onUpdate(float deltaTime)
     camera.onUpdate(deltaTime);
     grid.draw(gridSpacing, camera);
     drawComponents();
-    if (insertMode)
-    {
-        handleInsertMode();
-    }
+    if (mode == EditorMode::INSERT) handleInsertMode();
 }
 
 void EditorLayer::onEvent(Event& event)
@@ -351,7 +348,7 @@ int EditorLayer::getFreeLineIndex()
 
 void EditorLayer::handleInsertMode()
 {
-    if (!insertMode) return;
+    if (mode != EditorMode::INSERT) return;
 
     glm::vec2 worldPos = camera.screenToWorld(Input::getMousePosition());
     float gridX = round(worldPos.x / gridSpacing) * gridSpacing;
@@ -405,7 +402,7 @@ void EditorLayer::onMouseScroll(MouseScrolledEvent& event)
 
 void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
 {
-    if (!insertMode) return;
+    if (mode != EditorMode::INSERT) return;
 
     if (event.getButton() == GLFW_MOUSE_BUTTON_LEFT)
     {
@@ -432,16 +429,26 @@ void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
     }
 }
 
-void EditorLayer::onKeyPress(KeyPressedEvent& event)
+void EditorLayer::onKeyRelease(KeyReleasedEvent& event)
 {
-    if (event.getKeyCode() == GLFW_KEY_E)
+    // We use key release event instead of key press event to prevent
+    // multiple key presses when holding down a key
+
+    int key = event.getKeyCode();
+    switch (key)
     {
-        if (insertMode)
-        {
-            insertMode = false;
-            tempStartVertex.reset();
-        }
-        else
-            insertMode = true;
+        case GLFW_KEY_E:
+            if (mode != EditorMode::INSERT)
+                mode = EditorMode::INSERT;
+            else
+            {
+                mode = EditorMode::SELECT;
+                tempStartVertex.reset();
+            }
+            break;
+        case GLFW_KEY_Q:
+            if (mode == EditorMode::INSERT) tempStartVertex.reset();
+            mode = EditorMode::SELECT;
+            break;
     }
 }
