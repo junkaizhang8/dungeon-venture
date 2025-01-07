@@ -10,7 +10,7 @@ namespace Engine
         GLFWwindow* window =
             Application::getInstance().getWindow().getNativeWindow();
 
-        ASSERT(window, "Window is null");
+        ASSERT(window);
 
         int state = glfwGetKey(window, key);
         return state == GLFW_PRESS || state == GLFW_REPEAT;
@@ -21,7 +21,7 @@ namespace Engine
         GLFWwindow* window =
             Application::getInstance().getWindow().getNativeWindow();
 
-        ASSERT(window, "Window is null");
+        ASSERT(window);
 
         int state = glfwGetMouseButton(window, button);
         return state == GLFW_PRESS;
@@ -32,7 +32,7 @@ namespace Engine
         GLFWwindow* window =
             Application::getInstance().getWindow().getNativeWindow();
 
-        ASSERT(window, "Window is null");
+        ASSERT(window);
 
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);

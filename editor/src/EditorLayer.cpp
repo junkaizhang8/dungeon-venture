@@ -207,14 +207,14 @@ int EditorLayer::addLineVertex(float x, float y)
     {
         vertex->selected = true;
         int vboIndex = getIndexInVertexVBO(vertexIndex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 1;
     };
     vertex.onDeselect = [this, vertexIndex](Selectable* vertex)
     {
         vertex->selected = false;
         int vboIndex = getIndexInVertexVBO(vertexIndex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 0;
     };
     vertex.onDelete = [this, vertexIndex](Selectable* vertex)
@@ -235,11 +235,9 @@ int EditorLayer::addLineVertex(float x, float y)
 
 int EditorLayer::addLine(int startVertex, int endVertex)
 {
-    ASSERT(startVertex >= 0 && startVertex < lineVertices.size(),
-           "Invalid start vertex index: %d", startVertex);
+    ASSERT(startVertex >= 0 && startVertex < lineVertices.size());
 
-    ASSERT(endVertex >= 0 && endVertex < lineVertices.size(),
-           "Invalid end vertex index: %d", endVertex);
+    ASSERT(endVertex >= 0 && endVertex < lineVertices.size());
 
     // Check if the vertices are the same
     if (startVertex == endVertex) return -1;
@@ -258,24 +256,20 @@ int EditorLayer::addLine(int startVertex, int endVertex)
     {
         line->selected = true;
         int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-               lines.at(lineIndex).startVertex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 1;
         vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-               lines.at(lineIndex).endVertex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 1;
     };
     line.onDeselect = [this, lineIndex](Selectable* line)
     {
         line->selected = false;
         int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-               lines.at(lineIndex).startVertex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 0;
         vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
-        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-               lines.at(lineIndex).endVertex);
+        ASSERT(vboIndex != -1);
         selectedVertices.at(vboIndex) = 0;
     };
     line.onDelete = [this, lineIndex](Selectable* line)
@@ -288,12 +282,12 @@ int EditorLayer::addLine(int startVertex, int endVertex)
 
     ++vertexRefMap[startVertex];
     int startIndex = getIndexInVertexVBO(startVertex);
-    ASSERT(startIndex != -1, "Vertex %d not found in VBO", startVertex);
+    ASSERT(startIndex != -1);
     lineIBO.push_back(startIndex);
 
     ++vertexRefMap[endVertex];
     int endIndex = getIndexInVertexVBO(endVertex);
-    ASSERT(endIndex != -1, "Vertex %d not found in VBO", endVertex);
+    ASSERT(endIndex != -1);
     lineIBO.push_back(endIndex);
 
     return lineIndex;
@@ -301,8 +295,7 @@ int EditorLayer::addLine(int startVertex, int endVertex)
 
 void EditorLayer::removeVertex(int index)
 {
-    ASSERT(index >= 0 && index < lineVertices.size(),
-           "Invalid vertex index: %d", index);
+    ASSERT(index >= 0 && index < lineVertices.size());
 
     LineVertex& vertex = lineVertices.at(index);
     if (vertex.deleted) return;
@@ -313,7 +306,7 @@ void EditorLayer::removeVertex(int index)
 
 void EditorLayer::removeLine(int index)
 {
-    ASSERT(index >= 0 && index < lines.size(), "Invalid line index: %d", index);
+    ASSERT(index >= 0 && index < lines.size());
 
     Line& line = lines.at(index);
     if (line.deleted) return;
@@ -324,8 +317,7 @@ void EditorLayer::removeLine(int index)
 
 void EditorLayer::removeVertexImpl(int index)
 {
-    ASSERT(index >= 0 && index < lineVertices.size(),
-           "Invalid vertex index: %d", index);
+    ASSERT(index >= 0 && index < lineVertices.size());
 
     LineVertex& vertex = lineVertices.at(index);
 
@@ -335,7 +327,7 @@ void EditorLayer::removeVertexImpl(int index)
 
 void EditorLayer::removeLineImpl(int index)
 {
-    ASSERT(index >= 0 && index < lines.size(), "Invalid line index: %d", index);
+    ASSERT(index >= 0 && index < lines.size());
 
     Line& line = lines.at(index);
 
@@ -367,9 +359,9 @@ void EditorLayer::buildVertexVBO()
     lineIBO.clear();
     selectedVertices.clear();
 
-    ASSERT(vertexVBO.size() == 0, "Vertex list is not empty");
-    ASSERT(vertexIBO.size() == 0, "Vertex indices is not empty");
-    ASSERT(lineIBO.size() == 0, "Line indices is not empty");
+    ASSERT(vertexVBO.size() == 0);
+    ASSERT(vertexIBO.size() == 0);
+    ASSERT(lineIBO.size() == 0);
 
     for (int i = 0; i < lineVertices.size(); ++i)
     {
@@ -393,13 +385,12 @@ void EditorLayer::buildVertexVBO()
 
         ++vertexRefMap[line.startVertex];
         int startIndex = getIndexInVertexVBO(line.startVertex);
-        ASSERT(startIndex != -1, "Vertex %d not found in VBO",
-               line.startVertex);
+        ASSERT(startIndex != -1);
         lineIBO.push_back(startIndex);
 
         ++vertexRefMap[line.endVertex];
         int endIndex = getIndexInVertexVBO(line.endVertex);
-        ASSERT(endIndex != -1, "Vertex %d not found in VBO", line.endVertex);
+        ASSERT(endIndex != -1);
         lineIBO.push_back(endIndex);
     }
 }
@@ -532,9 +523,9 @@ void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
                 {
                     int startVertex =
                         addLineVertex(tempStartVertex->x, tempStartVertex->y);
-                    ASSERT(startVertex != -1, "Failed to add vertex");
+                    ASSERT(startVertex != -1);
                     int endVertex = addLineVertex(gridX, gridY);
-                    ASSERT(endVertex != -1, "Failed to add vertex");
+                    ASSERT(endVertex != -1);
                     addLine(startVertex, endVertex);
                 }
 

@@ -84,8 +84,8 @@ namespace Engine
          */
         inline void setMinZoom(float min)
         {
-            ASSERT(min > 0, "Minimum zoom must be greater than 0");
-            ASSERT(min < maxZoom, "Minimum zoom must be less than max zoom");
+            ASSERT(min > 0);
+            ASSERT(min < maxZoom);
             minZoom = min;
         }
 
@@ -105,8 +105,8 @@ namespace Engine
          */
         inline void setMaxZoom(float max)
         {
-            ASSERT(max > 0, "Maximum zoom must be greater than 0");
-            ASSERT(max > minZoom, "Maximum zoom must be greater than min zoom");
+            ASSERT(max > 0);
+            ASSERT(max > minZoom);
             maxZoom = max;
         }
 

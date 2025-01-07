@@ -131,11 +131,10 @@ namespace Engine
                 return;
             }
 
-            ASSERT(attribute->type == AttributeType::FLOAT,
-                   "Buffer type must be float");
+            ASSERT(attribute->type == AttributeType::FLOAT);
 
-            ASSERT(buffer.size() / attribute->count == vertices.size(),
-                   "Invalid buffer size");
+            // The buffer must provide the layout attributes for each vertex
+            ASSERT(buffer.size() / attribute->count == vertices.size());
 
             glGenBuffers(1,
                          &customvbos.at(index - Vertex::getAttributeCount()));
@@ -180,11 +179,10 @@ namespace Engine
                 return;
             }
 
-            ASSERT(attribute->type == AttributeType::INT,
-                   "Buffer type must be int");
+            ASSERT(attribute->type == AttributeType::INT);
 
-            ASSERT(buffer.size() / attribute->count == vertices.size(),
-                   "Invalid buffer size");
+            // The buffer must provide the layout attributes for each vertex
+            ASSERT(buffer.size() / attribute->count == vertices.size());
 
             glGenBuffers(1,
                          &customvbos.at(index - Vertex::getAttributeCount()));
@@ -230,11 +228,10 @@ namespace Engine
                 return;
             }
 
-            ASSERT(attribute->type == AttributeType::UNSIGNED_INT,
-                   "Buffer type must be unsigned int");
+            ASSERT(attribute->type == AttributeType::UNSIGNED_INT);
 
-            ASSERT(buffer.size() / attribute->count == vertices.size(),
-                   "Invalid buffer size");
+            // The buffer must provide the layout attributes for each vertex
+            ASSERT(buffer.size() / attribute->count == vertices.size());
 
             glGenBuffers(1,
                          &customvbos.at(index - Vertex::getAttributeCount()));
@@ -280,11 +277,10 @@ namespace Engine
                 return;
             }
 
-            ASSERT(attribute->type == AttributeType::UNSIGNED_INT,
-                   "Buffer type must be unsigned char");
+            ASSERT(attribute->type == AttributeType::UNSIGNED_INT);
 
-            ASSERT(buffer.size() / attribute->count == vertices.size(),
-                   "Invalid buffer size");
+            // The buffer must provide the layout attributes for each vertex
+            ASSERT(buffer.size() / attribute->count == vertices.size());
 
             glGenBuffers(1,
                          &customvbos.at(index - Vertex::getAttributeCount()));
