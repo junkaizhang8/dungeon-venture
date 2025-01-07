@@ -7,10 +7,6 @@
 
 namespace Engine
 {
-#ifdef ENGINE_DEBUG
-#define ENGINE_ENABLE_ASSERTS
-#endif
-
 #define TERMINAL_RESET "\033[0m"
 #define TERMINAL_BOLD "\033[1m"
 #define TERMINAL_RED_BOLD "\033[1;31m"

@@ -6,6 +6,10 @@ project(DungeonVenture)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+option(BUILD_EDITOR "Build the editor" OFF)
+
 # Add subdirectories
 add_subdirectory(engine)
-add_subdirectory(editor)
+if(BUILD_EDITOR)
+    add_subdirectory(editor)
+endif()
