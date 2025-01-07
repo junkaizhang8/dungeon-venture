@@ -25,6 +25,11 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+# Pass the debug flag
+if(ENGINE_DEBUG)
+    target_compile_definitions(engine PUBLIC ENGINE_DEBUG)
+endif()
+
 # Add subdirectories
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glew)

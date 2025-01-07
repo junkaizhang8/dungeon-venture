@@ -7,6 +7,19 @@
 
 namespace Engine
 {
+#ifdef ENGINE_DEBUG
+#ifdef _MSC_VER
+#define DEBUG_BREAK() __debugbreak()
+#elif defined(__clang__) || defined(__GNUC__)
+#define DEBUG_BREAK() __builtin_trap()
+#else
+#include <csignal>
+#define DEBUG_BREAK() std::raise(SIGTRAP)
+#endif
+#else
+#define DEBUG_BREAK() std::exit(EXIT_FAILURE)
+#endif
+
 #define TERMINAL_RESET "\033[0m"
 #define TERMINAL_BOLD "\033[1m"
 #define TERMINAL_RED_BOLD "\033[1;31m"
@@ -21,7 +34,7 @@ namespace Engine
                 __FILE__, __LINE__);                                     \
         fprintf(stderr, __VA_ARGS__);                                    \
         fprintf(stderr, "\n");                                           \
-        std::exit(EXIT_FAILURE);                                         \
+        DEBUG_BREAK();                                                   \
     }
 
 #define LOG_WARN(...)                                                        \
@@ -52,7 +65,7 @@ namespace Engine
                 __FILE__, __LINE__);                                     \
         fprintf(stderr, __VA_ARGS__);                                    \
         fprintf(stderr, "\n");                                           \
-        std::exit(EXIT_FAILURE);                                         \
+        DEBUG_BREAK();                                                   \
     }
 
 #define GL_LOG_WARN(...)                                                     \

@@ -30,7 +30,7 @@ else
 
     if [[ $BUILD_TYPE != "all" && $BUILD_TYPE != "game" && $BUILD_TYPE != "editor" ]]; then
         echo "Invalid build type: $BUILD_TYPE"
-        echo "Usage: $0 [all|editor|clean|clear-cache|help]"
+        echo "Usage: $0 [all|editor|clean|clear-cache|help] [debug]"
         exit 1
     fi
 fi
@@ -38,17 +38,24 @@ fi
 # Cache the build type
 echo $BUILD_TYPE > .build_type
 
+# Check if 'debug' is passed as the second argument
+if [[ $2 == "debug" ]]; then
+    ENGINE_DEBUG="ON"
+else
+    ENGINE_DEBUG="OFF"
+fi
+
 # Create a build directory
 mkdir -p build
 cd build
 
 # Build the project
 if [[ "$BUILD_TYPE" == "all" ]]; then
-    echo "Building the project..."
-    cmake -DBUILD_EDITOR=ON ..
+    [[ $ENGINE_DEBUG == "ON" ]] && echo "Building the project in debug mode..." || echo "Building the project..."
+    cmake -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
 elif [[ "$BUILD_TYPE" == "editor" ]]; then
-    echo "Building the editor..."
-    cmake -DBUILD_EDITOR=ON ..
+    [[ $ENGINE_DEBUG == "ON" ]] && echo "Building the editor in debug mode..." || echo "Building the editor..."
+    cmake -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
 fi
 
 cmake --build .
