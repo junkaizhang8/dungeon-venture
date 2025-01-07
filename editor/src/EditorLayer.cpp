@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "utils/macros.h"
+
 using namespace Engine;
 
 EditorLayer::EditorLayer()
@@ -93,6 +95,10 @@ int EditorLayer::getVertexIndex(glm::vec2 worldPos, float threshold)
     for (int i = 0; i < lineVertices.size(); ++i)
     {
         const LineVertex& vertex = lineVertices.at(i);
+
+        // Check if the vertex is deleted
+        if (vertex.deleted) continue;
+
         glm::vec2 vertexPos = {vertex.x, vertex.y};
         if (glm::distance(worldPos, vertexPos) <= threshold) return i;
     }
@@ -105,8 +111,13 @@ int EditorLayer::getLineIndex(glm::vec2 worldPos, float threshold)
     for (int i = 0; i < lines.size(); ++i)
     {
         const Line& line = lines.at(i);
+
+        // Check if the line is deleted
+        if (line.deleted) continue;
+
         const LineVertex& start = lineVertices.at(line.startVertex);
         const LineVertex& end = lineVertices.at(line.endVertex);
+
         glm::vec2 startVertex = {start.x, start.y};
         glm::vec2 endVertex = {end.x, end.y};
 
@@ -135,6 +146,10 @@ int EditorLayer::getLineIndex(int vertex1, int vertex2)
     for (int i = 0; i < lines.size(); ++i)
     {
         const Line& line = lines.at(i);
+
+        // Check if the line is deleted
+        if (line.deleted) continue;
+
         if ((line.startVertex == vertex1 && line.endVertex == vertex2) ||
             (line.startVertex == vertex2 && line.endVertex == vertex1))
             return i;
@@ -150,6 +165,10 @@ std::vector<int> EditorLayer::getLineIndices(int vertex)
     for (int i = 0; i < lines.size(); ++i)
     {
         const Line& line = lines.at(i);
+
+        // Check if the line is deleted
+        if (line.deleted) continue;
+
         if (line.startVertex == vertex || line.endVertex == vertex)
             lineIndices.push_back(i);
     }
@@ -162,8 +181,9 @@ int EditorLayer::getIndexInVertexVBO(int vertex)
     for (int i = 0; i < vertexVBO.size(); ++i)
     {
         const Vertex& v = vertexVBO.at(i);
-        if (v.position.x == lineVertices.at(vertex).x &&
-            v.position.y == lineVertices.at(vertex).y)
+
+        if (FP_EQUAL(v.position.x, lineVertices.at(vertex).x) &&
+            FP_EQUAL(v.position.y, lineVertices.at(vertex).y))
             return i;
     }
 
@@ -176,33 +196,34 @@ int EditorLayer::addLineVertex(float x, float y)
     int index = getVertexIndex({x, y});
     if (index != -1) return index;
 
+    LineVertex vertex(x, y);
+
     // Add the vertex to the list
     int vertexIndex = getFreeVertexIndex();
-    if (vertexIndex == -1)
+    if (vertexIndex == -1) vertexIndex = lineVertices.size();
+
+    // Set the line vertex callbacks
+    vertex.onSelect = [this, vertexIndex](Selectable* vertex)
     {
-        vertexIndex = lineVertices.size();
-        LineVertex vertex(x, y);
-        // Set the line vertex callbacks
-        vertex.onSelect = [this, vertexIndex](Selectable* vertex)
-        {
-            vertex->selected = true;
-            int vboIndex = getIndexInVertexVBO(vertexIndex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
-            selectedVertices.at(vboIndex) = 1;
-        };
-        vertex.onDeselect = [this, vertexIndex](Selectable* vertex)
-        {
-            vertex->selected = false;
-            int vboIndex = getIndexInVertexVBO(vertexIndex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
-            selectedVertices.at(vboIndex) = 0;
-        };
-        vertex.onDelete = [this, vertexIndex](Selectable* vertex)
-        { removeVertex(vertexIndex); };
+        vertex->selected = true;
+        int vboIndex = getIndexInVertexVBO(vertexIndex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+        selectedVertices.at(vboIndex) = 1;
+    };
+    vertex.onDeselect = [this, vertexIndex](Selectable* vertex)
+    {
+        vertex->selected = false;
+        int vboIndex = getIndexInVertexVBO(vertexIndex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO", vertexIndex);
+        selectedVertices.at(vboIndex) = 0;
+    };
+    vertex.onDelete = [this, vertexIndex](Selectable* vertex)
+    { removeVertex(vertexIndex); };
+
+    if (vertexIndex == lineVertices.size())
         lineVertices.push_back(vertex);
-    }
     else
-        lineVertices.at(vertexIndex) = {x, y};
+        lineVertices.at(vertexIndex) = vertex;
 
     vertexRefMap[vertexIndex] = 0;
     vertexIBO.push_back(vertexVBO.size());
@@ -226,46 +247,44 @@ int EditorLayer::addLine(int startVertex, int endVertex)
     // Check if the line already exists
     if (getLineIndex(startVertex, endVertex) != -1) return -1;
 
+    Line line(startVertex, endVertex);
+
     // Add the line to the list
     int lineIndex = getFreeLineIndex();
-    if (lineIndex == -1)
-    {
-        lineIndex = lines.size();
-        Line line(startVertex, endVertex);
-        // Set the line callbacks
-        line.onSelect = [this, lineIndex](Selectable* line)
-        {
-            line->selected = true;
-            int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-                   lines.at(lineIndex).startVertex);
-            selectedVertices.at(vboIndex) = 1;
-            vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-                   lines.at(lineIndex).endVertex);
-            selectedVertices.at(vboIndex) = 1;
-        };
-        line.onDeselect = [this, lineIndex](Selectable* line)
-        {
-            line->selected = false;
-            int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-                   lines.at(lineIndex).startVertex);
-            selectedVertices.at(vboIndex) = 0;
-            vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
-            ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
-                   lines.at(lineIndex).endVertex);
-            selectedVertices.at(vboIndex) = 0;
-        };
-        line.onDelete = [this, lineIndex](Selectable* line)
-        { removeLine(lineIndex); };
-        lines.push_back(line);
-    }
-    else
-        lines.at(lineIndex) = {startVertex, endVertex};
+    if (lineIndex == -1) lineIndex = lines.size();
 
-    const LineVertex& start = lineVertices.at(startVertex);
-    const LineVertex& end = lineVertices.at(endVertex);
+    // Set the line callbacks
+    line.onSelect = [this, lineIndex](Selectable* line)
+    {
+        line->selected = true;
+        int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+               lines.at(lineIndex).startVertex);
+        selectedVertices.at(vboIndex) = 1;
+        vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+               lines.at(lineIndex).endVertex);
+        selectedVertices.at(vboIndex) = 1;
+    };
+    line.onDeselect = [this, lineIndex](Selectable* line)
+    {
+        line->selected = false;
+        int vboIndex = getIndexInVertexVBO(lines.at(lineIndex).startVertex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+               lines.at(lineIndex).startVertex);
+        selectedVertices.at(vboIndex) = 0;
+        vboIndex = getIndexInVertexVBO(lines.at(lineIndex).endVertex);
+        ASSERT(vboIndex != -1, "Vertex %d not found in VBO",
+               lines.at(lineIndex).endVertex);
+        selectedVertices.at(vboIndex) = 0;
+    };
+    line.onDelete = [this, lineIndex](Selectable* line)
+    { removeLine(lineIndex); };
+
+    if (lineIndex == lines.size())
+        lines.push_back(line);
+    else
+        lines.at(lineIndex) = line;
 
     ++vertexRefMap[startVertex];
     int startIndex = getIndexInVertexVBO(startVertex);
@@ -282,12 +301,23 @@ int EditorLayer::addLine(int startVertex, int endVertex)
 
 void EditorLayer::removeVertex(int index)
 {
+    ASSERT(index >= 0 && index < lineVertices.size(),
+           "Invalid vertex index: %d", index);
+
+    LineVertex& vertex = lineVertices.at(index);
+    if (vertex.deleted) return;
+
     removeVertexImpl(index);
     buildVertexVBO();
 }
 
 void EditorLayer::removeLine(int index)
 {
+    ASSERT(index >= 0 && index < lines.size(), "Invalid line index: %d", index);
+
+    Line& line = lines.at(index);
+    if (line.deleted) return;
+
     removeLineImpl(index);
     buildVertexVBO();
 }
@@ -308,6 +338,7 @@ void EditorLayer::removeLineImpl(int index)
     ASSERT(index >= 0 && index < lines.size(), "Invalid line index: %d", index);
 
     Line& line = lines.at(index);
+
     line.deleted = true;
     freeLineIndices.push(index);
 
@@ -334,6 +365,7 @@ void EditorLayer::buildVertexVBO()
     vertexVBO.clear();
     vertexIBO.clear();
     lineIBO.clear();
+    selectedVertices.clear();
 
     ASSERT(vertexVBO.size() == 0, "Vertex list is not empty");
     ASSERT(vertexIBO.size() == 0, "Vertex indices is not empty");
@@ -346,8 +378,9 @@ void EditorLayer::buildVertexVBO()
         if (lineVertex.deleted) continue;
 
         vertexRefMap[i] = 0;
-        vertexIBO.push_back(i);
+        vertexIBO.push_back(vertexVBO.size());
         vertexVBO.push_back({{lineVertex.x, lineVertex.y, 0.0f}});
+        selectedVertices.push_back(0);
     }
 
     for (const Line& line : lines)
@@ -499,7 +532,9 @@ void EditorLayer::onMouseButtonPress(MouseButtonPressedEvent& event)
                 {
                     int startVertex =
                         addLineVertex(tempStartVertex->x, tempStartVertex->y);
+                    ASSERT(startVertex != -1, "Failed to add vertex");
                     int endVertex = addLineVertex(gridX, gridY);
+                    ASSERT(endVertex != -1, "Failed to add vertex");
                     addLine(startVertex, endVertex);
                 }
 
@@ -533,7 +568,8 @@ void EditorLayer::onKeyRelease(KeyReleasedEvent& event)
             if (mode == EditorMode::INSERT) tempStartVertex.reset();
             mode = EditorMode::SELECT;
             break;
-        case GLFW_KEY_DELETE:
+        case GLFW_KEY_BACKSPACE:
             if (mode == EditorMode::SELECT) selectionManager.deleteSelected();
+            break;
     }
 }

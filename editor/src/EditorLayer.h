@@ -70,6 +70,7 @@ private:
     // A queue of free (deleted) line indices
     std::queue<int> freeLineIndices;
 
+    // The selection manager
     SelectionManager selectionManager;
 
     // The shader used to draw the line vertices

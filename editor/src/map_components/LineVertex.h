@@ -1,9 +1,6 @@
 #pragma once
 
-#include "../Selectable.h"
-
-// Epsilon value for floating point comparison
-static const float EPSILON = 0.0001f;
+#include "../utils/macros.h"
 
 /**
  * @brief A struct representing a line vertex.
@@ -40,7 +37,6 @@ struct LineVertex : public Selectable
      */
     bool operator==(const LineVertex& other) const
     {
-        return std::abs(x - other.x) < EPSILON &&
-               std::abs(y - other.y) < EPSILON;
+        return FP_EQUAL(x, other.x) && FP_EQUAL(y, other.y);
     }
 };
