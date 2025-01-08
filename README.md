@@ -2,11 +2,19 @@
 
 ## Install
 1. Have [CMake](https://cmake.org/download/) installed
-2. Build everything
+2. Clone the repository
+    ```
+    git clone https://github.com/junkaizhang8/dungeon-venture.git
+    ```
+3. Initialize and fetch submodules
+    ```
+    git submodule update --init --recursive
+    ```
+4. Build the project
     ```
     ./build.sh
     ```
-3. Run the editor
+5. Run the editor
     ```
     ./run_editor.sh
     ```
