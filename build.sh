@@ -1,5 +1,7 @@
 #!/bin/bash
 
+GENERATOR="Make"
+
 # Clean the build directory
 if [[ $1 == "clean" ]]; then
     rm -rf build
@@ -45,6 +47,15 @@ else
     ENGINE_DEBUG="OFF"
 fi
 
+# Check if Ninja is installed, otherwise default to Make
+if command -v ninja &> /dev/null; then
+    echo "Ninja found, using Ninja generator..."
+    GENERATOR="Ninja"
+else
+    echo "Ninja not found, using Make generator..."
+    GENERATOR="Unix Makefiles"
+fi
+
 # Create a build directory
 mkdir -p build
 cd build
@@ -52,10 +63,10 @@ cd build
 # Build the project
 if [[ "$BUILD_TYPE" == "all" ]]; then
     [[ $ENGINE_DEBUG == "ON" ]] && echo "Building the project in debug mode..." || echo "Building the project..."
-    cmake -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
+    cmake -G "$GENERATOR" -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
 elif [[ "$BUILD_TYPE" == "editor" ]]; then
     [[ $ENGINE_DEBUG == "ON" ]] && echo "Building the editor in debug mode..." || echo "Building the editor..."
-    cmake -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
+    cmake -G "$GENERATOR" -DBUILD_EDITOR=ON -DENGINE_DEBUG=$ENGINE_DEBUG ..
 fi
 
 cmake --build .
